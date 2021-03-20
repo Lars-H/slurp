@@ -1,0 +1,38 @@
+{
+  "operator_id": 1,
+  "switched": true,
+  "produced_tuples": 2,
+  "switch_rule": 1,
+  "subtype": "Poly Bind Join",
+  "right": {
+    "source_id": 2,
+    "tpf": "?v2 <http://schema.org/caption> ?v3 .",
+    "cardinality": "2490",
+    "type": "Leaf"
+  },
+  "tuples_produced": 2,
+  "estimated_tuples": 35,
+  "type": "NLJ",
+  "left": {
+    "operator_id": 0,
+    "switched": false,
+    "produced_tuples": 44,
+    "switch_rule": 1,
+    "subtype": "Poly Bind Join",
+    "right": {
+      "source_id": 1,
+      "tpf": "?v0 <http://db.uwaterloo.ca/~galuc/wsdbm/likes> ?v2 .",
+      "cardinality": "110412",
+      "type": "Leaf"
+    },
+    "tuples_produced": 44,
+    "estimated_tuples": 35,
+    "type": "NLJ",
+    "left": {
+      "source_id": 0,
+      "tpf": "?v0 <http://db.uwaterloo.ca/~galuc/wsdbm/subscribes> <http://db.uwaterloo.ca/~galuc/wsdbm/Website2244> .",
+      "cardinality": "35",
+      "type": "Leaf"
+    }
+  }
+}

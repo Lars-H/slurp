@@ -1,0 +1,23 @@
+{
+	"type": "SHJ",
+	"estimated_cardinality": 35,
+	"left": {
+		"type": "NLJ",
+		"estimated_cardinality": 35,
+		"left": {
+			"type": "Leaf",
+			"tpf": "?v0 <http://db.uwaterloo.ca/~galuc/wsdbm/subscribes> <http://db.uwaterloo.ca/~galuc/wsdbm/Website2244> .",
+			"cardinality": "35"
+		},
+		"right": {
+			"type": "Leaf",
+			"tpf": "?v0 <http://db.uwaterloo.ca/~galuc/wsdbm/likes> ?v2 .",
+			"cardinality": "110412"
+		}
+	},
+	"right": {
+		"type": "Leaf",
+		"tpf": "?v2 <http://schema.org/caption> ?v3 .",
+		"cardinality": "2490"
+	}
+}

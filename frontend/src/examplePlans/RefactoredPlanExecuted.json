@@ -1,0 +1,18 @@
+{
+	"type": "InnerNode",
+	"left": {
+		"type": "InnerNode",
+		"left": {
+			"type": "Leaf",
+			"tpf": "?v0 <http://db.uwaterloo.ca/~galuc/wsdbm/subscribes> <http://db.uwaterloo.ca/~galuc/wsdbm/Website2244> ."
+		},
+		"right": {
+			"type": "Leaf",
+			"tpf": "?v0 <http://db.uwaterloo.ca/~galuc/wsdbm/likes> ?v2 ."
+		}
+	},
+	"right": {
+		"type": "Leaf",
+		"tpf": "?v2 <http://schema.org/caption> ?v3 ."
+	}
+}

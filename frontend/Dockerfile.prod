@@ -1,0 +1,36 @@
+FROM node:14.15.4-alpine as build
+
+# Build args
+ARG REACT_APP_PORT
+ARG REACT_APP_FRONTEND_PROXY
+ARG REACT_APP_BASE_URL
+ARG REACT_APP_API_PROXY
+
+
+# ENV
+ENV REACT_APP_PORT=${REACT_APP_PORT}
+ENV REACT_APP_FRONTEND_PROXY=${REACT_APP_FRONTEND_PROXY}
+ENV REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
+ENV REACT_APP_API_PROXY=${REACT_APP_API_PROXY}
+ENV NODE_ENV=production
+
+
+WORKDIR /app
+
+COPY package*.json ./
+
+# If the code is built for production, run
+# RUN npm install --only=production
+
+COPY . /app
+RUN npm ci
+RUN npm run build
+
+
+# production environment
+FROM nginx:stable-alpine
+COPY --from=build /app/build /usr/share/nginx/html
+# new
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 3000
+CMD ["nginx", "-g", "daemon off;"]

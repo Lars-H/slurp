@@ -1,0 +1,18 @@
+.navbar {
+    // border: 1px solid gray;
+    height: 64px;
+    border-color: transparent;
+    background-image: linear-gradient(to right, #2d3c4d, #2a3848, #263442, #23303d, #202c38);
+}
+
+a {
+    text-decoration: none !important;
+}
+
+.navbar-brand {
+    font-size: 21px
+}
+
+.navbar-brand-secondary {
+    font-size: 13px
+}

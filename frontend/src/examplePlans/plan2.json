@@ -1,0 +1,52 @@
+{
+  "operator_id": 2,
+  "switched": false,
+  "produced_tuples": 0,
+  "switch_rule": 1,
+  "subtype": "Poly Bind Join",
+  "right": {
+    "source_id": 3,
+    "tpf": "?v0 <http://schema.org/description> ?v2 .",
+    "cardinality": "15092",
+    "type": "Leaf"
+  },
+  "tuples_produced": 0,
+  "estimated_tuples": 1490,
+  "type": "NLJ",
+  "left": {
+    "operator_id": 1,
+    "hj_cost_factor": 1.0,
+    "switched": true,
+    "produced_tuples": 0,
+    "subtype": "Poly Hash Join",
+    "right": {
+      "source_id": 2,
+      "tpf": "?v0 <http://schema.org/keywords> ?v3 .",
+      "cardinality": "7535",
+      "type": "Leaf"
+    },
+    "tuples_produced": 0,
+    "estimated_tuples": 1490,
+    "type": "SHJ",
+    "left": {
+      "subtype": "Fjoin",
+      "operator_id": 0,
+      "right": {
+        "source_id": 1,
+        "tpf": "?v0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://db.uwaterloo.ca/~galuc/wsdbm/ProductCategory1> .",
+        "cardinality": "1674",
+        "type": "Leaf"
+      },
+      "tuples_produced": 0,
+      "estimated_tuples": 1490,
+      "type": "SHJ",
+      "produced_tuples": 0,
+      "left": {
+        "source_id": 0,
+        "tpf": "?v0 <http://schema.org/language> <http://db.uwaterloo.ca/~galuc/wsdbm/Language0> .",
+        "cardinality": "1490",
+        "type": "Leaf"
+      }
+    }
+  }
+}

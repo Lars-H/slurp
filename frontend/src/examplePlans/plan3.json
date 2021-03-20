@@ -1,0 +1,146 @@
+{
+	"subtype": "Fjoin",
+	"operator_id": 8,
+	"right": {
+		"subtype": "Fjoin",
+		"operator_id": 7,
+		"right": {
+			"source_id": 9,
+			"tpf": "?v4 <http://xmlns.com/foaf/homepage> ?v6 .",
+			"cardinality": "11294",
+			"type": "Leaf"
+		},
+		"tuples_produced": 238,
+		"estimated_tuples": 4791,
+		"type": "SHJ",
+		"produced_tuples": 238,
+		"left": {
+			"source_id": 8,
+			"tpf": "?v4 <http://schema.org/jobTitle> ?v5 .",
+			"cardinality": "4791",
+			"type": "Leaf"
+		}
+	},
+	"tuples_produced": 2,
+	"estimated_tuples": 114,
+	"type": "SHJ",
+	"produced_tuples": 2,
+	"left": {
+		"operator_id": 6,
+		"switched": false,
+		"produced_tuples": 637,
+		"switch_rule": 1,
+		"subtype": "Poly Bind Join",
+		"right": {
+			"source_id": 7,
+			"tpf": "?v4 <http://db.uwaterloo.ca/~galuc/wsdbm/makesPurchase> ?v7 .",
+			"cardinality": "149999",
+			"type": "Leaf"
+		},
+		"tuples_produced": 637,
+		"estimated_tuples": 1,
+		"type": "NLJ",
+		"left": {
+			"operator_id": 5,
+			"switched": false,
+			"produced_tuples": 637,
+			"switch_rule": 1,
+			"subtype": "Poly Bind Join",
+			"right": {
+				"source_id": 6,
+				"tpf": "?v7 <http://db.uwaterloo.ca/~galuc/wsdbm/purchaseFor> ?v3 .",
+				"cardinality": "150000",
+				"type": "Leaf"
+			},
+			"tuples_produced": 637,
+			"estimated_tuples": 19,
+			"type": "NLJ",
+			"left": {
+				"operator_id": 4,
+				"switched": false,
+				"produced_tuples": 422,
+				"switch_rule": 1,
+				"subtype": "Poly Bind Join",
+				"right": {
+					"source_id": 5,
+					"tpf": "?v8 <http://purl.org/stuff/rev#totalVotes> ?v9 .",
+					"cardinality": "7630",
+					"type": "Leaf"
+				},
+				"tuples_produced": 422,
+				"estimated_tuples": 16,
+				"type": "NLJ",
+				"left": {
+					"operator_id": 3,
+					"switched": false,
+					"produced_tuples": 7518,
+					"switch_rule": 1,
+					"subtype": "Poly Bind Join",
+					"right": {
+						"source_id": 4,
+						"tpf": "?v3 <http://purl.org/stuff/rev#hasReview> ?v8 .",
+						"cardinality": "147436",
+						"type": "Leaf"
+					},
+					"tuples_produced": 7518,
+					"estimated_tuples": 9039,
+					"type": "NLJ",
+					"left": {
+						"operator_id": 2,
+						"switched": true,
+						"produced_tuples": 1194,
+						"switch_rule": 1,
+						"subtype": "Poly Bind Join",
+						"right": {
+							"source_id": 3,
+							"tpf": "?v2 <http://purl.org/goodrelations/includes> ?v3 .",
+							"cardinality": "90000",
+							"type": "Leaf"
+						},
+						"tuples_produced": 1194,
+						"estimated_tuples": 79,
+						"type": "NLJ",
+						"left": {
+							"operator_id": 1,
+							"switched": true,
+							"produced_tuples": 1194,
+							"switch_rule": 1,
+							"subtype": "Poly Bind Join",
+							"right": {
+								"source_id": 2,
+								"tpf": "?v2 <http://schema.org/eligibleRegion> <http://db.uwaterloo.ca/~galuc/wsdbm/Country5> .",
+								"cardinality": "9039",
+								"type": "Leaf"
+							},
+							"tuples_produced": 1194,
+							"estimated_tuples": 114,
+							"type": "NLJ",
+							"left": {
+								"operator_id": 0,
+								"switched": false,
+								"produced_tuples": 11779,
+								"switch_rule": 1,
+								"subtype": "Poly Bind Join",
+								"right": {
+									"source_id": 1,
+									"tpf": "?v0 <http://purl.org/goodrelations/offers> ?v2 .",
+									"cardinality": "119815",
+									"type": "Leaf"
+								},
+								"tuples_produced": 11779,
+								"estimated_tuples": 114,
+								"type": "NLJ",
+								"left": {
+									"source_id": 0,
+									"tpf": "?v0 <http://schema.org/legalName> ?v1 .",
+									"cardinality": "114",
+									"type": "Leaf"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

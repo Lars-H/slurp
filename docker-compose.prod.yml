@@ -1,0 +1,81 @@
+version: "3.7"
+
+services:
+  backend:
+    container_name: backend_query_planner
+    build: ./backend
+    env_file: .env
+    environment:
+      - REACT_APP_PORT=${REACT_APP_PORT}
+      - FRONTEND_PROXY=${FRONTEND_PROXY}
+      - HTTPS_ENABLED=${HTTPS_ENABLED}
+    volumes:
+      - ./backend:/app
+      - ./crop_engine/nlde:/app/nlde
+      - ./crop_engine/crop:/app/crop
+    ports:
+      - "5000:5000"
+    restart: always
+    depends_on:
+      - redis
+      - mongodb
+
+  frontend:
+    container_name: frontend_query_planner
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        - REACT_APP_PORT=${REACT_APP_PORT}
+        - REACT_APP_FRONTEND_PROXY=${FRONTEND_PROXY}
+        - REACT_APP_BASE_URL=${BASE_URL}
+        - REACT_APP_API_PROXY=${API_PROXY}
+    env_file: .env
+    stdin_open: true
+    ports:
+      - ${REACT_APP_PORT}:${REACT_APP_PORT}
+    links:
+      - backend
+    restart: always
+    depends_on:
+      - backend
+
+  task_queue:
+    build: ./task_queue
+    user: nobody
+    restart: always
+    volumes:
+      - ./task_queue:/task_queue
+      - ./crop_engine/nlde:/task_queue/nlde
+      - ./crop_engine/crop:/task_queue/crop
+    depends_on:
+      - redis
+      - backend
+
+  redis:
+    restart: always
+    image: "redis:4-alpine"
+    ports:
+      - "6379:6379"
+
+  flower:
+    restart: always
+    image: mher/flower:0.9.4
+    command: ["flower", "--broker=redis://redis:6379/0", "--port=8888"]
+    ports:
+      - 8888:8888
+
+  mongodb:
+    restart: always
+    env_file: .env
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+
+volumes:
+  mongodb_data_container:

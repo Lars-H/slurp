@@ -1,0 +1,7 @@
+rdflib==5.0.0
+requests
+ply
+celery[redis]
+billiard
+pymongo
+dnspython
