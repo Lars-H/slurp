@@ -79,6 +79,8 @@ services:
       - 27017:27017
     volumes:
       - mongodb_data_container:/data/db
+    logging:
+      driver: "none"
 
 volumes:
   mongodb_data_container:
