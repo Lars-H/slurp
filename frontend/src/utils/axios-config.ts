@@ -9,6 +9,11 @@ interface IGetExecutionPlan {
 	optimizer: string;
 }
 
+interface IGetExecutionsForIdenticalQuery {
+	hash: string;
+	plan: string;
+}
+
 interface IExecuteQueryAsync {
 	// TODO
 	plan: any;
@@ -45,4 +50,6 @@ export default {
 	getResult: (resultId: string) => API.get<ITaskPageDataResponse>(`result/${resultId}`),
 	getRequestList: () => API.get<IQueryOverviewElement[]>("/result"),
 	getFilteredList: (name: string) => API.get(`result/filter/${name}`),
+	getExecutionsForIdenticalQuery: (data: IGetExecutionsForIdenticalQuery) =>
+		API.get("/executions/hash", { params: data }),
 };

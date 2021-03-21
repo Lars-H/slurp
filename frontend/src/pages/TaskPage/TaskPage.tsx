@@ -37,6 +37,7 @@ interface ITaskPageState extends Partial<ITaskPageDataResponse> {
 	taskId: string;
 	planCy: any;
 	fetchingResults: boolean;
+	executionsForSameQuery?: Partial<ITaskPageDataResponse>[];
 }
 
 const RETRIEVE_RESULTS_INTERVAL = 5000;
@@ -53,6 +54,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 		requests: 0,
 		status: undefined,
 		fetchingResults: false,
+		executionsForSameQuery: undefined,
 	};
 
 	getTaskInfo = async () => {
@@ -76,6 +78,8 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 					setTimeout(() => {
 						this.getTaskInfo();
 					}, RETRIEVE_RESULTS_INTERVAL);
+
+					this.fetchDifferentExececutionPlansForIdenticalQuery();
 
 					this.setState({
 						fetchingResults: false,
@@ -101,6 +105,33 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 			this.setState({
 				fetchingResults: false,
 			});
+		}
+	};
+
+	fetchDifferentExececutionPlansForIdenticalQuery = async () => {
+		console.log(this.state.query_hash);
+		if (!this.state.query_hash) {
+			return;
+		}
+
+		const payload = {
+			hash: btoa(this.state.query_hash.toString()),
+			plan: btoa(this.state.plan),
+		};
+
+		let response;
+		try {
+			response = await api.getExecutionsForIdenticalQuery(payload);
+
+			console.log("Before filter");
+			console.log(response.data);
+			const data = response.data.filter((el) => !deepCompare(el.plan, this.state.plan));
+			console.log("After filter");
+			console.log(data);
+
+			this.setState({ executionsForSameQuery: data });
+		} catch (err) {
+			console.log(err);
 		}
 	};
 
