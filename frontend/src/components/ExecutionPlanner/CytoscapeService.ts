@@ -344,6 +344,13 @@ export class CytoscapeService {
 		// https://github.com/atomiks/tippyjs/issues/661
 		const dummyDomEle = document.createElement("div");
 
+		const tipContent = this.createTippyContent(node);
+
+		// Do not show tip if the hovered node does not have any data to show.
+		if (tipContent.children.length === 0) {
+			return;
+		}
+
 		// using tippy@^5.2.1
 		const tip = tippy(dummyDomEle, {
 			trigger: "manual",
@@ -355,7 +362,7 @@ export class CytoscapeService {
 			}, // needed for `ref` positioning
 			maxWidth: 500,
 			content: () => {
-				return this.createTippyContent(node);
+				return tipContent;
 			},
 		});
 		tip.show();
@@ -592,13 +599,14 @@ export class CytoscapeService {
 
 		// If two subtrees with each more than one node are joined, then the JOIN is a SHJ, otherwise a NLJ
 		const joinID = uuidv4();
-		const joinOperator = {
+		const newInnerNode = {
 			id: joinID,
-			type: tree1.length > 1 && tree2.length > 1 ? "SHJ" : "NLJ",
+			type: "InnerNode",
 			label: tree1.length > 1 && tree2.length > 1 ? "SHJ" : "NLJ",
+			joinOperator: tree1.length > 1 && tree2.length > 1 ? "SHJ" : "NLJ",
 		};
 		this.cy.add({
-			data: joinOperator,
+			data: newInnerNode,
 			group: "nodes",
 			classes: "center-center",
 		});
