@@ -23,7 +23,7 @@ def plan_from_optimizer(query_str, sources, optimizer_dct={}):
     decomposer_enabled = optimizer_dct.get("decomposer", False)
     pruning_enabled = optimizer_dct.get("pruning", False)
 
-    if optimizer_name == "left-deep" or "left-linear":
+    if optimizer_name == "left-deep" or optimizer_name == "left-linear":
         optimizer = LDFF_Optimizer(sources=sources, eddies=eddies, pbj=pbj_enabled, decomposer=decomposer_enabled, pruning=pruning_enabled)
 
     elif optimizer_name == "nLDE":
