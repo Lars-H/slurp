@@ -262,8 +262,9 @@ def get_executions_for_identical_query():
             },
             {
                 "$group": {
-                    "_id": "$plan_hash", "doc": {"$first": "$$ROOT"},
-                    "maxQuantity": {"$max": "$t_start"}
+                    "_id": "$plan_hash",
+                    "maxQuantity": {"$max": "$t_start"},
+                    "doc": {"$last": "$$ROOT"}
                 }
             },
             {"$replaceRoot": {"newRoot": "$doc"}}
