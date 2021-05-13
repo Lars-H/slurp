@@ -30,7 +30,7 @@ import { AlertContent } from "components/HoCs/withAlert";
 const MODE_EDIT = "edit";
 const MODE_VIEW = "view";
 
-const DEFAULT_SOURCE = "tpf@http://aifb-ls3-vm8.aifb.kit.edu:5000/watdiv";
+const DEFAULT_SOURCE = "tpf@http://fragments.dbpedia.org/2014/en";
 
 const SUPPORTED_QUERY_TYPES = ["SELECT"];
 
