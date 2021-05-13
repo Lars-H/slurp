@@ -1,6 +1,5 @@
 import cloneDeep from "lodash/cloneDeep";
 import { v4 as uuidv4 } from "uuid";
-import { logger } from "utils/logger";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import { nodeMenu, coreMenu } from "./cy-cxtmenu";
@@ -674,7 +673,6 @@ export class CytoscapeService {
 	};
 
 	isLeaf = (node) => {
-		logger(node.data("type"));
 		return node.data("type") === "Leaf";
 	};
 

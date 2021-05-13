@@ -7,7 +7,6 @@ import { RepeatIcon, AddIcon } from "@chakra-ui/icons";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 import { IAlertProps } from "components/HoCs/withAlert";
 import { IQueryOverviewElement } from "interface/IQueryOverviewElement";
-import { logger } from "utils/logger";
 
 interface IMainPageState {
 	requestList: IQueryOverviewElement[];
@@ -44,7 +43,7 @@ class MainPage extends Component<RouteComponentProps & IAlertProps, IMainPageSta
 		try {
 			const response = await api.getFilteredList(queryName);
 			this.setState({ requestList: response.data });
-			logger(response.data);
+			console.log(response.data);
 		} catch (error) {
 			console.error(error);
 		}

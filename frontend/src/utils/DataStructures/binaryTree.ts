@@ -1,7 +1,6 @@
 import { ExecutionPlan } from "interface/ExecutionPlan";
 import { v4 as uuidv4 } from "uuid";
 import { deleteEmptyFields } from "../utils";
-import { logger } from "utils/logger";
 
 type PrefixValuePair = Array<string>;
 
@@ -186,7 +185,6 @@ class BinaryTree {
 			// Inner Node
 			const { joinOperator, ...otherProperties } = nodeData;
 			node = new InnerNode(joinOperator, otherProperties);
-			logger(node);
 		}
 
 		if (!this.root) {

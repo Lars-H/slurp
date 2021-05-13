@@ -8,7 +8,6 @@ import QueryEditor from "components/QueryEditor/QueryEditor";
 
 import withAlert, { IAlertProps } from "components/HoCs/withAlert";
 import { withRouter, RouteComponentProps } from "react-router-dom";
-import { logger } from "utils/logger";
 import planOne from "../../examplePlans/Aktuell.json";
 
 interface ICreateQueryPageState {
@@ -43,7 +42,7 @@ class CreateQueryPage extends Component<IAlertProps & RouteComponentProps, ICrea
 		optimizerName: string,
 		queryName?: string
 	) => {
-		logger("Retrieving Execution Plan");
+		console.log("Retrieving Execution Plan");
 		this.setState({
 			query: query,
 			sources: sources,
@@ -58,11 +57,11 @@ class CreateQueryPage extends Component<IAlertProps & RouteComponentProps, ICrea
 			optimizer: btoa(optimizerName),
 		};
 
-		logger("Query an Backend gesendet: ");
-		logger(query);
-		logger(optimizerName);
-		logger(`Sources: ${sources}`);
-		logger("---");
+		console.log("Query an Backend gesendet: ");
+		console.log(query);
+		console.log(optimizerName);
+		console.log(`Sources: ${sources}`);
+		console.log("---");
 
 		let response;
 		try {
@@ -86,15 +85,15 @@ class CreateQueryPage extends Component<IAlertProps & RouteComponentProps, ICrea
 		// this.setState({ query: query });
 		this.props.setAlert(null);
 
-		logger("Recommended Execution Plan vom Server erhalten:");
-		logger(response.data);
+		console.log("Recommended Execution Plan vom Server erhalten:");
+		console.log(response.data);
 
 		const tree = new BinaryTree();
 		tree.buildTreeFromExecutionPlan(response.data, query);
 		const treeElements = tree.getElements();
 
-		logger("Execution Plan aus folgenden Elementen gebaut:");
-		logger(treeElements);
+		console.log("Execution Plan aus folgenden Elementen gebaut:");
+		console.log(treeElements);
 
 		this.setState({
 			suggestedExecutionPlan: treeElements,
@@ -113,17 +112,17 @@ class CreateQueryPage extends Component<IAlertProps & RouteComponentProps, ICrea
 			query_name: this.state.queryName ? this.state.queryName : null,
 		};
 
-		logger(payload);
+		console.log(payload);
 
-		logger("Executing Plan:");
-		logger(executionPlan);
+		console.log("Executing Plan:");
+		console.log(executionPlan);
 
 		try {
 			const response = await api.executeQueryAsync(payload);
-			logger(response.data);
+			console.log(response.data);
 			this.props.history.push(`/task/${response.data["task_id"]}`);
 		} catch (err) {
-			logger(err);
+			console.log(err);
 		}
 		this.setState({
 			executionPlanSubmitted: false,

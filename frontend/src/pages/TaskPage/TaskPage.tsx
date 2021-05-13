@@ -63,7 +63,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 			this.state.status === "pending" ||
 			this.state.status === "queue"
 		) {
-			logger(`Fetching results from task ${this.state.taskId}`);
+			console.log(`Fetching results from task ${this.state.taskId}`);
 
 			this.setState({
 				fetchingResults: true,
@@ -72,7 +72,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 			api.getResult(this.state.taskId)
 				.then((response) => {
 					this.setState(response.data);
-					logger(response.data);
+					console.log(response.data);
 					this.setState({ ...response.data });
 
 					setTimeout(() => {
@@ -145,7 +145,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 				planCy: treeElements,
 			});
 		} else {
-			logger("Error. Execution plan or Query not available");
+			console.log("Error. Execution plan or Query not available");
 		}
 	};
 

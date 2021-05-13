@@ -1,6 +1,5 @@
 import Alert, { AlertStatus } from "components/Alert/Alert";
 import React, { useState } from "react";
-import { logger } from "utils/logger";
 
 export interface IAlertProps {
 	setAlert: React.Dispatch<React.SetStateAction<AlertContent | null>>;
@@ -14,7 +13,6 @@ export interface AlertContent {
 
 export const renderAlert = (alertObj: AlertContent | null) => {
 	if (alertObj && alertObj.title && alertObj.msg && alertObj.status) {
-		logger("RENDER ALERT");
 		return <Alert title={alertObj.title} description={alertObj.msg} status={alertObj.status} />;
 	}
 	return null;

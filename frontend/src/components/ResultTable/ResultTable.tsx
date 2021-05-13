@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 import "@triply/yasr/build/yasr.min.css";
 import Yasr from "@triply/yasr";
-import { logger } from "utils/logger";
+
 
 function ResultTable(props) {
 	const yasrRef = useRef(null);
@@ -33,7 +33,7 @@ function ResultTable(props) {
 	// Call this method each time the provided results change
 	useEffect(() => {
 		if (yasr && props.results) {
-			logger(props.results);
+			console.log(props.results);
 			updateResults(yasr);
 		}
 	}, [props.results]);

@@ -20,8 +20,6 @@ import Alert from "components/Alert/Alert";
 
 import "./QueryEditor.scss";
 
-import { logger } from "utils/logger";
-
 import "@triply/yasqe/build/yasqe.min.css";
 
 import Yasqe from "@triply/yasqe";
@@ -181,8 +179,6 @@ const QueryEditor = (props: IPropsEditMode | IPropsViewMode) => {
 
 			const keywordwithspaces = ` ${keyword} `;
 			if (query.includes(keywordwithspaces)) {
-				logger(keyword);
-				logger(query);
 				return { forbiddenKeywordFound: true, keyword };
 			}
 		}
@@ -193,8 +189,8 @@ const QueryEditor = (props: IPropsEditMode | IPropsViewMode) => {
 	const handleSubmit = () => {
 		if (isQueryValid() && areSourcesValid() && yasqe && props.mode === MODE_EDIT) {
 			const formattedQuery = formatQuery(yasqe.getValue());
-			logger("Formatted Query:");
-			logger(formattedQuery);
+			console.log("Formatted Query:");
+			console.log(formattedQuery);
 
 			yasqe.setValue(formattedQuery);
 
