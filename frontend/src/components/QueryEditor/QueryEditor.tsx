@@ -32,20 +32,26 @@ const DEFAULT_SOURCE = "tpf@http://fragments.dbpedia.org/2014/en";
 
 const SUPPORTED_QUERY_TYPES = ["SELECT"];
 
-interface IPropsEditMode {
+interface IPropsQueryEditor {
+	taskId?: string;
+}
+
+interface IPropsEditMode extends IPropsQueryEditor {
 	mode: "edit";
 	querySubmitted: boolean;
 	resetSubmition(): void;
 	submitQuery(query: string, sources: string[], optimizerName: string, queryName?: string): void;
 }
 
-interface IPropsViewMode {
+interface IPropsViewMode extends IPropsQueryEditor {
 	mode: "view";
 	query: string;
 }
 
 const QueryEditor = (props: IPropsEditMode | IPropsViewMode) => {
 	const yasqeRef = useRef(null);
+
+	const yasqeId = props.taskId ? `yasqe-${props.taskId}` : `yasqe`;
 
 	const [yasqe, setYasqe] = useState<Yasqe>();
 
@@ -83,7 +89,7 @@ const QueryEditor = (props: IPropsEditMode | IPropsViewMode) => {
 			return DEFAULT_QUERY;
 		})();
 
-		const yasqeElement = document.getElementById("yasqe");
+		const yasqeElement = document.getElementById(yasqeId);
 		if (!yasqeElement) {
 			return;
 		}
@@ -283,7 +289,7 @@ const QueryEditor = (props: IPropsEditMode | IPropsViewMode) => {
 						setSources={setSources}
 						querySubmitted={props.querySubmitted}
 					/>
-					<div id="yasqe" ref={yasqeRef} />
+					<div id={yasqeId} ref={yasqeRef} />
 					<Flex>
 						<FormControl id="optimizer">
 							<FormLabel>Select Optimizer</FormLabel>
@@ -323,7 +329,7 @@ const QueryEditor = (props: IPropsEditMode | IPropsViewMode) => {
 				</>
 			) : (
 				<>
-					<div id="yasqe" ref={yasqeRef} />
+					<div id={yasqeId} ref={yasqeRef} />
 				</>
 			)}
 		</>

@@ -58,7 +58,6 @@ app.wsgi_app = Reversed_Proxy(
 def get_plan():
     try:
         backend_logger.info("Request from Frontend: {}".format(request.args))
-
         query_str = base64.b64decode(request.args.get('query')).decode('ascii')
         sources_str = base64.b64decode(
             request.args.get('sources')).decode('ascii')
@@ -71,13 +70,14 @@ def get_plan():
             optimizer_dict['name'] = optimizer_name
 
         plan = plan_from_optimizer(query_str, sources, optimizer_dict)
-        #planDict = planToDict(plan)
+        # planDict = planToDict(plan)
         planDict = plan.json_dict
         backend_logger.info(planDict)
         return jsonify(planDict)
 
     except requests.exceptions.ConnectionError as connec_error:
         host = connec_error.message.pool.host
+        backend_logger.info(connec_error)
         print {'title': 'Connection error', 'msg': 'Host ' + str(host) + ' not found.'}
         return jsonify({'title': 'Connection error', 'msg': 'Host ' + str(host) + ' not found.'}), 400
 
@@ -228,6 +228,48 @@ def get_filtered_results(query_name):
 
     # Return result as JSON
     return jsonify(results)
+
+
+'''
+Retrieve all unique query plans for a query.
+If there are multiple identical plans, the latest plan is returned
+'''
+
+
+@app.route('/executions/hash')
+def get_executions_for_identical_query():
+    query_hash = base64.b64decode(
+        request.args.get('query_hash')).decode('ascii')
+    plan_hash = base64.b64decode(request.args.get('plan_hash')).decode('ascii')
+
+    try:
+        client = MongoClient(mongodb_url)
+    except Exception as e:
+        return json.dumps({'title': 'Could not connect to database.', 'msg': 'Authentication failed.'}), 500
+
+    db = client.querydb
+    queries = db.queries
+
+    # https://stackoverflow.com/questions/52566913/how-to-group-in-mongodb-and-return-all-fields-in-result
+    different_plans_for_same_query = list(
+        queries.aggregate([
+            {
+                "$match": {
+                    "query_hash": query_hash,
+                    "plan_hash": {
+                        "$ne": plan_hash}
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$plan_hash", "doc": {"$first": "$$ROOT"},
+                    "maxQuantity": {"$max": "$t_start"}
+                }
+            },
+            {"$replaceRoot": {"newRoot": "$doc"}}
+        ]))
+
+    return jsonify(different_plans_for_same_query)
 
 
 if __name__ == '__main__':

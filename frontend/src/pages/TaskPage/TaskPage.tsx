@@ -11,8 +11,12 @@ import {
 	AccordionIcon,
 	AccordionPanel,
 	Center,
+	Text,
 	Flex,
 	Heading,
+	Select,
+	Button,
+	Tooltip,
 } from "@chakra-ui/react";
 import BinaryTree from "utils/DataStructures/binaryTree";
 import { timeConverter } from "../../utils/utils";
@@ -25,7 +29,7 @@ import MetaBadges from "components/MetaBadges/MetaBadges";
 import { deepCompare } from "utils/utils";
 import { RouteComponentProps } from "react-router-dom";
 import { ITaskPageDataResponse } from "interface/ITaskPageDataResponse";
-import { logger } from "utils/logger";
+import TaskOverview from "components/TaskOverview/TaskOverview";
 
 interface IMatchParams {
 	taskId: string;
@@ -37,7 +41,10 @@ interface ITaskPageState extends Partial<ITaskPageDataResponse> {
 	taskId: string;
 	planCy: any;
 	fetchingResults: boolean;
-	executionsForSameQuery?: Partial<ITaskPageDataResponse>[];
+
+	executionsForSameQuery: Partial<ITaskPageDataResponse>[];
+	isComparingExecutionPlans: boolean;
+	comparandExecutionPlan?: Partial<ITaskPageDataResponse>;
 }
 
 const RETRIEVE_RESULTS_INTERVAL = 5000;
@@ -51,10 +58,12 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 		sparql_results: null,
 		query: "",
 		query_name: "",
+		plan_hash: "",
 		requests: 0,
 		status: undefined,
 		fetchingResults: false,
-		executionsForSameQuery: undefined,
+		executionsForSameQuery: [],
+		isComparingExecutionPlans: false,
 	};
 
 	getTaskInfo = async () => {
@@ -110,26 +119,19 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 
 	fetchDifferentExececutionPlansForIdenticalQuery = async () => {
 		console.log(this.state.query_hash);
-		if (!this.state.query_hash) {
+		if (!this.state.query_hash || !this.state.plan_hash) {
 			return;
 		}
 
 		const payload = {
-			hash: btoa(this.state.query_hash.toString()),
-			plan: btoa(this.state.plan),
+			query_hash: btoa(this.state.query_hash),
+			plan_hash: btoa(this.state.plan_hash),
 		};
 
 		let response;
 		try {
 			response = await api.getExecutionsForIdenticalQuery(payload);
-
-			console.log("Before filter");
-			console.log(response.data);
-			const data = response.data.filter((el) => !deepCompare(el.plan, this.state.plan));
-			console.log("After filter");
-			console.log(data);
-
-			this.setState({ executionsForSameQuery: data });
+			this.setState({ executionsForSameQuery: response.data });
 		} catch (err) {
 			console.log(err);
 		}
@@ -181,98 +183,89 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 		return null;
 	};
 
+	toggleCompareExecutions = () => {
+		this.setState({ isComparingExecutionPlans: !this.state.isComparingExecutionPlans });
+	};
+
+	compareWithExecutionPlan = (id: string) => {
+		if (!this.state.executionsForSameQuery) {
+			return;
+		}
+		const comparandIndex = this.state.executionsForSameQuery.findIndex((el) => el._id === id);
+
+		if (comparandIndex !== -1) {
+			this.setState({
+				comparandExecutionPlan: this.state.executionsForSameQuery[comparandIndex],
+			});
+		}
+	};
+
 	render() {
 		return (
 			<>
 				{this.state.query ? (
-					<Stack>
-						<Flex wrap="wrap" mb="5" align="center" justifyContent="space-between">
-							<Heading as="h1" size="lg">
-								Task {this.state.taskId}
-							</Heading>
-
-							{this.state.query_name && (
-								<Heading mr="1" size="md">
-									Name: {this.state.query_name}
+					<>
+						<Stack>
+							<Flex wrap="wrap" mb="5" align="center" justifyContent="space-between">
+								<Heading as="h1" size="lg">
+									Task {this.state.taskId}
 								</Heading>
-							)}
-						</Flex>
-						{this.createAlertInfo()}
-						<Accordion defaultIndex={[0, 3]} allowMultiple>
-							<AccordionItem>
-								<AccordionButton>
-									<Box flex="1" textAlign="left">
-										Information
-									</Box>
-									<AccordionIcon />
-								</AccordionButton>
 
-								<AccordionPanel pb={4}>
-									<Stack shouldWrapChildren spacing="32px">
-										<MetaBadges
-											status={this.state.status}
-											resultCount={this.state.result_count}
-											requests={this.state.requests}
-											tDelta={this.state.t_delta}
-											showRequestHint={true}
-											tStart={timeConverter(this.state.t_start)}
-											tEnd={
-												this.state.t_end && timeConverter(this.state.t_end)
-											}
-										/>
-										<Flex wrap="wrap" mt="-5">
-											{this.state.sources &&
-												this.state.sources.map((el) => {
-													return <Badge key={el}>{el}</Badge>;
+								{this.state.query_name && (
+									<Heading mr="1" size="md">
+										Name: {this.state.query_name}
+									</Heading>
+								)}
+							</Flex>
+							{this.createAlertInfo()}
+
+							<TaskOverview {...this.state} />
+							{/* <TaskOverview {...this.state} _id="wegweg" /> */}
+						</Stack>
+
+						{this.state.executionsForSameQuery.length > 0 && (
+							<Box mt={4}>
+								{this.state.isComparingExecutionPlans ? (
+									<>
+										<Flex>
+											<Select
+												placeholder="Select option"
+												onChange={(evt) =>
+													this.compareWithExecutionPlan(evt.target.value)
+												}
+											>
+												{this.state.executionsForSameQuery.map((el) => {
+													return (
+														<Tooltip key={el._id} label="lol">
+															<option value={el._id}>{el._id}</option>
+														</Tooltip>
+													);
 												})}
+											</Select>
+											<Button ml={2} onClick={this.toggleCompareExecutions}>
+												Hide
+											</Button>
 										</Flex>
-									</Stack>
-								</AccordionPanel>
-							</AccordionItem>
-
-							<AccordionItem>
-								<AccordionButton>
-									<Box flex="1" textAlign="left">
-										Query
-									</Box>
-									<AccordionIcon />
-								</AccordionButton>
-								<AccordionPanel pb={4}>
-									<QueryEditor mode="view" query={this.state.query} />
-								</AccordionPanel>
-							</AccordionItem>
-
-							<AccordionItem>
-								<AccordionButton>
-									<Box flex="1" textAlign="left">
-										Execution Plan
-									</Box>
-									<AccordionIcon />
-								</AccordionButton>
-								<AccordionPanel pb={4}>
-									<ColoredExecutionPlanner
-										mode="view"
-										suggestedExecutionPlan={this.state.planCy}
-									/>
-								</AccordionPanel>
-							</AccordionItem>
-
-							<AccordionItem>
-								<AccordionButton>
-									<Box flex="1" textAlign="left">
-										Results
-									</Box>
-									<AccordionIcon />
-								</AccordionButton>
-								<AccordionPanel pb={4}>
-									<ResultTable
-										results={this.state.sparql_results}
-										status={this.state.status}
-									/>
-								</AccordionPanel>
-							</AccordionItem>
-						</Accordion>
-					</Stack>
+										{this.state.comparandExecutionPlan && (
+											<TaskOverview {...this.state.comparandExecutionPlan} />
+										)}
+									</>
+								) : (
+									<Flex>
+										<Text color="gray.400" fontSize="18px">
+											There are different execution plans for the same query
+										</Text>
+										<Button
+											display="inline"
+											onClick={this.toggleCompareExecutions}
+										>
+											Compare
+										</Button>
+									</Flex>
+								)}
+							</Box>
+						)}
+					</>
 				) : (
 					<Center>
 						<Spinner mt="10" size="xl" />

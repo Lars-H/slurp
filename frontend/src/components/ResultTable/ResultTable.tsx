@@ -3,9 +3,16 @@ import React, { useState, useEffect, useRef } from "react";
 import "@triply/yasr/build/yasr.min.css";
 import Yasr from "@triply/yasr";
 
+interface IResultTableProps {
+	results: any;
+	status: any;
+	taskId: string;
+}
 
 function ResultTable(props) {
 	const yasrRef = useRef(null);
+
+	const yasrId = props.taskId ? `yasr-${props.taskId}` : `yasr`;
 
 	const [yasr, setYasr] = useState<Yasr>();
 
@@ -22,8 +29,8 @@ function ResultTable(props) {
 	useEffect(() => {
 		localStorage.removeItem("yasr__response");
 
-		if (document.getElementById("yasr")) {
-			const yasrInstance = new Yasr(document.getElementById("yasr") as HTMLElement, {});
+		if (document.getElementById(yasrId)) {
+			const yasrInstance = new Yasr(document.getElementById(yasrId) as HTMLElement, {});
 			updateResults(yasrInstance);
 			setYasr(yasrInstance);
 		}
@@ -48,7 +55,7 @@ function ResultTable(props) {
 
 	return (
 		<>
-			<div id="yasr" ref={yasrRef} />
+			<div id={yasrId} ref={yasrRef} />
 		</>
 	);
 }

@@ -7,11 +7,11 @@ const render = () => {
 	ReactDOM.render(createRoutes(), document.getElementById("root"));
 };
 
-// if (module.hot) {
-//   module.hot.accept("./App", () => {
-//       setTimeout(render);
-//   });
-// }
+if (module.hot) {
+	module.hot.accept("./", () => {
+		setTimeout(render);
+	});
+}
 
 render();
 

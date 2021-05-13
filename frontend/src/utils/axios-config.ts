@@ -9,8 +9,8 @@ interface IGetExecutionPlan {
 }
 
 interface IGetExecutionsForIdenticalQuery {
-	hash: string;
-	plan: string;
+	query_hash: string;
+	plan_hash: string;
 }
 
 interface IExecuteQueryAsync {

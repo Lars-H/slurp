@@ -4,7 +4,8 @@ export interface ITaskPageDataResponse {
 	_id: string;
 	plan: any;
 	query: string;
-	query_hash: number;
+	query_hash: string;
+	plan_hash: string;
 	query_name: string;
 	requests: number;
 	result_count: number;
