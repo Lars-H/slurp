@@ -6,7 +6,9 @@ const MetaBadges = (props) => {
 	return (
 		<HStack wrap="wrap">
 			<StatusBadge status={props.status} />
-			{props.resultCount && <Badge colorScheme="yellow">Results: {props.resultCount}</Badge>}
+			{(props.resultCount !== null || props.resultCount !== undefined) && (
+				<Badge colorScheme="yellow">Results: {props.resultCount}</Badge>
+			)}
 			<Badge colorScheme="purple">Runtime: {props.tDelta.toFixed(2)} Sec</Badge>
 			{props.requests === 0 && props.showRequestHint ? (
 				<Tooltip label="In case of a Timeout, the number of requests are not counted">
