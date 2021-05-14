@@ -289,14 +289,19 @@ export class CytoscapeService {
 		Create HTML Content for the generated Tippy on hover of a node. 
 		Content is generic since it renders all key, value pairs which it receives from the backend (except default keys like id etc.)
 	*/
-	createTippyContent = (node: NodeSingular) => {
+	createTippyContent = (node: NodeSingular): HTMLDivElement | undefined => {
 		const ignoreKeys = ["id", "label", "type", "NLJdisabled", "joinOperator"];
-		const content = document.createElement("div");
+		let content: HTMLDivElement | undefined;
 		for (const [key, value] of Object.entries(node.data())) {
 			// Do not show values of those keys.
 			if (ignoreKeys.includes(key)) {
 				continue;
 			}
+
+			if (!content) {
+				content = document.createElement("div");
+			}
+
 			const child = document.createElement("div");
 
 			// Check for known jeys with different wording.
@@ -337,8 +342,12 @@ export class CytoscapeService {
 	 */
 	handleOnHover = (evt: EventObject) => {
 		const node = evt.target;
-		const ref = node.popperRef(); // used only for positioning
+		const tippyContent = this.createTippyContent(node);
+		if (!tippyContent) {
+			return;
+		}
 
+		const ref = node.popperRef(); // used only for positioning
 		// unfortunately, a dummy element must be passed as tippy only accepts a dom element as the target
 		// https://github.com/atomiks/tippyjs/issues/661
 		const dummyDomEle = document.createElement("div");
@@ -354,7 +363,7 @@ export class CytoscapeService {
 			}, // needed for `ref` positioning
 			maxWidth: 500,
 			content: () => {
-				return this.createTippyContent(node);
+				return tippyContent;
 			},
 		});
 		tip.show();
