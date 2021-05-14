@@ -25,7 +25,6 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 	const [cyPlan, setCyPlan] = useState();
 
 	useEffect(() => {
-		// TODO: Check here?
 		transformExecutionPlanForCy();
 	}, [props.plan]);
 
@@ -40,6 +39,12 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 			console.log("Error. Execution plan or Query not available");
 		}
 	};
+
+	const noResultsAfterQueryFinished =
+		props.status &&
+		props.sparql_results &&
+		["done", "timeout", "failed"].includes(props.status) &&
+		props.sparql_results.results.bindings.length === 0;
 
 	return (
 		<>
@@ -98,21 +103,34 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 						</AccordionPanel>
 					</AccordionItem>
 
-					<AccordionItem>
-						<AccordionButton>
-							<Box flex="1" textAlign="left">
-								Results
+					{noResultsAfterQueryFinished ? (
+						<AccordionItem>
+							<Box
+								height="40px"
+								borderBottomColor="rgb(226, 232, 240)"
+								padding="8px 16px"
+								userSelect="none"
+							>
+								No Results
 							</Box>
-							<AccordionIcon />
-						</AccordionButton>
-						<AccordionPanel pb={4}>
-							<ResultTable
-								results={props.sparql_results}
-								status={props.status}
-								taskId={props._id}
-							/>
-						</AccordionPanel>
-					</AccordionItem>
+						</AccordionItem>
+					) : (
+						<AccordionItem>
+							<AccordionButton>
+								<Box flex="1" textAlign="left">
+									Results
+								</Box>
+								<AccordionIcon />
+							</AccordionButton>
+							<AccordionPanel pb={4}>
+								<ResultTable
+									results={props.sparql_results}
+									status={props.status}
+									taskId={props._id}
+								/>
+							</AccordionPanel>
+						</AccordionItem>
+					)}
 				</Accordion>
 			)}
 		</>

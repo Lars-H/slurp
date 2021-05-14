@@ -2,14 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 
 import "@triply/yasr/build/yasr.min.css";
 import Yasr from "@triply/yasr";
+import { ProcessingQueryStatusTypes } from "interface/ITaskPageDataResponse";
 
 interface IResultTableProps {
 	results: any;
-	status: any;
+	status: ProcessingQueryStatusTypes;
 	taskId: string;
 }
 
-function ResultTable(props) {
+function ResultTable(props: IResultTableProps) {
 	const yasrRef = useRef(null);
 
 	const yasrId = props.taskId ? `yasr-${props.taskId}` : `yasr`;
