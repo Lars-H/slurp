@@ -14,8 +14,11 @@ export const convertSpecialCharsToHTML = (s: string) => {
 	return s;
 };
 
-export const timeConverter = (UNIX_timestamp) => {
-	return new Date(UNIX_timestamp * 1000).toLocaleString("en-GB");
+export const timeConverter = (unixTimestamp) => {
+	const ts = new Date(unixTimestamp * 1000);
+	return `
+	${ts.getFullYear().toString().padStart(4, '0')}-${(ts.getMonth() + 1).toString().padStart(2, '0')}-${ts.getDate().toString().padStart(2, '0')}
+	${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')}:${ts.getSeconds().toString().padStart(2, '0')}`
 };
 
 export const formatQuery = (query: string) => {
