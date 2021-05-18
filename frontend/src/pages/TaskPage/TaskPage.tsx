@@ -19,6 +19,8 @@ import {deepCompare} from "utils/utils";
 import {RouteComponentProps} from "react-router-dom";
 import {ITaskPageDataResponse, TaskStatus} from "interface/ITaskPageDataResponse";
 import TaskOverview from "components/TaskOverview/TaskOverview";
+import TwoTasksComparison from "components/TaskOverview/TwoTasksComparison";
+
 
 interface IMatchParams {
 	taskId: string;
@@ -260,27 +262,12 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 
 						<Flex>
 							{this.state.comparandExecutionPlan ? (
-								<>
-									<TaskOverview
-										{...this.state.task}
-										splitView={splitViewActive}
-										extendedItems={this.state.syncedExtendedAccordionItems}
-										updateExtendedItems={this.updateExtendedItems}
-									/>
-									<Box marginLeft="32px"></Box>
-									<TaskOverview
-										{...this.state.comparandExecutionPlan}
-										splitView={splitViewActive}
-										extendedItems={this.state.syncedExtendedAccordionItems}
-										updateExtendedItems={this.updateExtendedItems}
-									/>
-								</>
+								<TwoTasksComparison
+									first={this.state.task}
+									second={this.state.comparandExecutionPlan}/>
 							) : (
 								<TaskOverview
 									{...this.state.task}
-									splitView={splitViewActive}
-									extendedItems={this.state.syncedExtendedAccordionItems}
-									updateExtendedItems={this.updateExtendedItems}
 								/>
 							)}
 						</Flex>

@@ -11,6 +11,7 @@ import {
 	Badge,
 	ExpandedIndex,
 	Heading,
+	AccordionProps,
 } from "@chakra-ui/react";
 import ColoredExecutionPlanner from "components/ExecutionPlanner/ColoredExecutionPlanner";
 import MetaBadges from "components/MetaBadges/MetaBadges";
@@ -21,13 +22,15 @@ import BinaryTree from "utils/DataStructures/binaryTree";
 import {ITaskPageDataResponse, TaskStatus} from "interface/ITaskPageDataResponse";
 import {NoResultsAccordionItem} from "./NoResultsAccordionItem";
 
-interface ITaskOverviewProps extends ITaskPageDataResponse {
-	splitView: boolean;
-	extendedItems: ExpandedIndex;
-	updateExtendedItems: (extendedItems: ExpandedIndex) => void;
+
+type SingleTaskProps = ITaskPageDataResponse;
+
+type SplitViewTaskProps = ITaskPageDataResponse & {
+	extendedItems: ExpandedIndex,
+	updateExtendedItems: (extendedItems: ExpandedIndex) => void
 }
 
-const TaskOverview = (props: ITaskOverviewProps) => {
+const TaskOverview = (props: SingleTaskProps | SplitViewTaskProps) => {
 	const [cyPlan, setCyPlan] = useState();
 
 	useEffect(() => {
@@ -38,9 +41,29 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 		const tree = new BinaryTree();
 		tree.buildTreeFromExecutionPlan(props.plan, props.query);
 		const treeElements = tree.getElements();
-
 		setCyPlan(treeElements);
 	};
+
+	const getAccordionProps = () => {
+		const accordionProps: AccordionProps = {
+			allowToggle: true,
+			allowMultiple: true,
+		};
+
+		if ('extendedItems' in props) {
+			Object.assign(accordionProps, {
+				width: '50%',
+				onChange: (extendedItems) => props.updateExtendedItems(extendedItems),
+				index: props.extendedItems
+			});
+		} else {
+			Object.assign(accordionProps, {
+				width: '100%',
+				defaultIndex: [0, 3],
+			});
+		}
+		return accordionProps;
+	}
 
 	const noResultsAfterQueryFinished =
 		[TaskStatus.done, TaskStatus.timeout, TaskStatus.failed].includes(props.status) &&
@@ -48,11 +71,7 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 
 	return (
 		<Accordion
-			allowToggle
-			index={props.extendedItems}
-			allowMultiple
-			width={props.splitView ? "50%" : "100%"}
-			onChange={(extendedItems) => props.updateExtendedItems(extendedItems)}
+			{...getAccordionProps()}
 		>
 
 			<Box pl="16px" mb="8px">
@@ -119,7 +138,7 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 			</AccordionItem>
 
 			{noResultsAfterQueryFinished ? (
-				<NoResultsAccordionItem/>
+				<NoResultsAccordionItem />
 			) : (
 				<AccordionItem>
 					<AccordionButton>
