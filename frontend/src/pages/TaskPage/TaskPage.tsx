@@ -43,15 +43,7 @@ const RETRIEVE_RESULTS_INTERVAL = 5000;
 class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 	state: ITaskPageState = {
 		taskId: this.props.match.params.taskId,
-		// plan: null,
 		planCy: null,
-		// sources: [],
-		// sparql_results: null,
-		// query: "",
-		// query_name: "",
-		// plan_hash: "",
-		// requests: 0,
-		// status: undefined,
 		fetchingResults: false,
 		executionsForSameQuery: [],
 		isComparingExecutionPlans: false,
