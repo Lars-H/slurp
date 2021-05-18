@@ -39,7 +39,7 @@ const HelpModal: React.FC = () => {
 							respective line number in the query editor) and joins (nodes indicated
 							by their jointype). There are several ways to modify the execution plan:
 						</Text>
-						<Accordion>
+						<Accordion allowToggle>
 							<AccordionItem>
 								<AccordionButton>
 									<Box flex="1" textAlign="left">
