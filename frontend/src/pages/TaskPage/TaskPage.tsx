@@ -1,14 +1,12 @@
-import React, {Component} from "react";
+import {Component} from "react";
 import api from "utils/axios-config";
 import {
 	Stack,
 	Spinner,
-	Badge,
 	Box,
 	Center,
 	Text,
 	Flex,
-	Heading,
 	Select,
 	Button,
 	Tooltip,
@@ -19,7 +17,7 @@ import Alert from "components/Alert/Alert";
 import withAlert, {IAlertProps} from "components/HoCs/withAlert";
 import {deepCompare} from "utils/utils";
 import {RouteComponentProps} from "react-router-dom";
-import {ITaskPageDataResponse} from "interface/ITaskPageDataResponse";
+import {ITaskPageDataResponse, TaskStatus} from "interface/ITaskPageDataResponse";
 import TaskOverview from "components/TaskOverview/TaskOverview";
 
 interface IMatchParams {
@@ -28,14 +26,15 @@ interface IMatchParams {
 
 type IMatchProps = RouteComponentProps<IMatchParams>;
 
-interface ITaskPageState extends Partial<ITaskPageDataResponse> {
+interface ITaskPageState {
+	task?: ITaskPageDataResponse;
 	taskId: string;
 	planCy: any;
 	fetchingResults: boolean;
 
-	executionsForSameQuery: Partial<ITaskPageDataResponse>[];
+	executionsForSameQuery: ITaskPageDataResponse[];
 	isComparingExecutionPlans: boolean;
-	comparandExecutionPlan?: Partial<ITaskPageDataResponse>;
+	comparandExecutionPlan?: ITaskPageDataResponse;
 	syncedExtendedAccordionItems: ExpandedIndex;
 }
 
@@ -44,15 +43,15 @@ const RETRIEVE_RESULTS_INTERVAL = 5000;
 class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 	state: ITaskPageState = {
 		taskId: this.props.match.params.taskId,
-		plan: null,
+		// plan: null,
 		planCy: null,
-		sources: [],
-		sparql_results: null,
-		query: "",
-		query_name: "",
-		plan_hash: "",
-		requests: 0,
-		status: undefined,
+		// sources: [],
+		// sparql_results: null,
+		// query: "",
+		// query_name: "",
+		// plan_hash: "",
+		// requests: 0,
+		// status: undefined,
 		fetchingResults: false,
 		executionsForSameQuery: [],
 		isComparingExecutionPlans: false,
@@ -61,9 +60,9 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 
 	getTaskInfo = async () => {
 		if (
-			!this.state.status ||
-			this.state.status === "pending" ||
-			this.state.status === "queue"
+			!this.state.task ||
+			this.state.task.status === "pending" ||
+			this.state.task.status === "queue"
 		) {
 			console.log(`Fetching results from task ${this.state.taskId}`);
 
@@ -73,9 +72,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 
 			api.getResult(this.state.taskId)
 				.then((response) => {
-					this.setState(response.data);
-					console.log(response.data);
-					this.setState({...response.data});
+					this.setState({task: response.data});
 
 					setTimeout(() => {
 						this.getTaskInfo();
@@ -88,10 +85,8 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 					});
 				})
 				.catch((err) => {
-					// Stop fetching
 					this.setState({
 						fetchingResults: false,
-						status: "failed",
 					});
 
 					// Generate Alert Message
@@ -111,14 +106,13 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 	};
 
 	fetchDifferentExececutionPlansForIdenticalQuery = async () => {
-		console.log(this.state.query_hash);
-		if (!this.state.query_hash || !this.state.plan_hash) {
+		if (!this.state.task) {
 			return;
 		}
 
 		const payload = {
-			query_hash: btoa(this.state.query_hash),
-			plan_hash: btoa(this.state.plan_hash),
+			query_hash: btoa(this.state.task.query_hash),
+			plan_hash: btoa(this.state.task.plan_hash),
 		};
 
 		let response;
@@ -131,9 +125,10 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 	};
 
 	transformExecutionPlanForCy = () => {
-		if (this.state.plan && this.state.query) {
+		const task = this.state.task;
+		if (task) {
 			const tree = new BinaryTree();
-			tree.buildTreeFromExecutionPlan(this.state.plan, this.state.query);
+			tree.buildTreeFromExecutionPlan(task.plan, task.query);
 			const treeElements = tree.getElements();
 
 			this.setState({
@@ -149,13 +144,25 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 	};
 
 	componentDidUpdate = (_: any, prevState: ITaskPageState) => {
-		if (!deepCompare(prevState.plan, this.state.plan)) {
+		const taskCurrentState = this.state.task;
+		const taskPrevState = prevState.task;
+		if (!taskCurrentState || !taskPrevState) {
+			return;
+		}
+
+		if (!deepCompare(taskCurrentState.plan, taskPrevState.plan)) {
 			this.transformExecutionPlanForCy();
 		}
 	};
 
 	createAlertInfo = () => {
-		if (this.state.sparql_results && this.state.status === "pending") {
+		if (!this.state.task || !this.state.task.sparql_results) {
+			return;
+		}
+
+		const status = this.state.task.status;
+
+		if (status === TaskStatus.pending) {
 			return (
 				<Alert
 					title="Query is currently processed"
@@ -164,7 +171,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 				/>
 			);
 		}
-		if (this.state.sparql_results && this.state.status === "queue") {
+		if (status === TaskStatus.queue) {
 			return (
 				<Alert
 					title="Query is currently waiting in queue"
@@ -207,7 +214,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 		const splitViewActive = typeof this.state.comparandExecutionPlan !== "undefined";
 		return (
 			<>
-				{this.state.query ? (
+				{this.state.task ? (
 					<Stack>
 						{this.createAlertInfo()}
 
@@ -263,7 +270,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 							{this.state.comparandExecutionPlan ? (
 								<>
 									<TaskOverview
-										{...this.state}
+										{...this.state.task}
 										splitView={splitViewActive}
 										extendedItems={this.state.syncedExtendedAccordionItems}
 										updateExtendedItems={this.updateExtendedItems}
@@ -278,7 +285,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 								</>
 							) : (
 								<TaskOverview
-									{...this.state}
+									{...this.state.task}
 									splitView={splitViewActive}
 									extendedItems={this.state.syncedExtendedAccordionItems}
 									updateExtendedItems={this.updateExtendedItems}

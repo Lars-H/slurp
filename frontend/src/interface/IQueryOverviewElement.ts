@@ -1,6 +1,8 @@
+import {TaskStatus} from "./ITaskPageDataResponse";
+
 export interface IQueryOverviewElement {
 	_id: string;
-	status: "done" | "timeout" | "pending";
+	status: TaskStatus;
 	result_count: number;
 	t_delta: number;
 	requests: number;

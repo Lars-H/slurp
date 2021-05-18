@@ -5,12 +5,12 @@ import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import MetaBadges from "components/MetaBadges/MetaBadges";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 import PropTypes from "prop-types";
-import { ProcessingQueryStatusTypes } from "interface/ITaskPageDataResponse";
+import { ITaskPageDataResponse, TaskStatus } from "interface/ITaskPageDataResponse";
 
 interface QueryBoxProps {
 	key: string;
 	id: string;
-	status: ProcessingQueryStatusTypes;
+	status: TaskStatus;
 	resultCount: number;
 	tDelta: number;
 	requests: number;
@@ -74,7 +74,7 @@ const QueryBox = (props: QueryBoxProps & RouteComponentProps) => {
 // TODO: FIX
 QueryBox.propTypes = {
 	id: PropTypes.string.isRequired,
-	status: PropTypes.oneOf<ProcessingQueryStatusTypes>(["done", "timeout", "pending"]).isRequired,
+	status: PropTypes.oneOf<TaskStatus>([TaskStatus.done, TaskStatus.timeout, TaskStatus.pending]).isRequired,
 	resultCount: PropTypes.number.isRequired,
 	tStart: PropTypes.string.isRequired,
 	query: PropTypes.string.isRequired,

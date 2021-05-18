@@ -2,11 +2,11 @@ import Yasr from "@triply/yasr";
 import "@triply/yasr/build/yasr.min.css";
 
 import React, { useState, useEffect, useRef } from "react";
-import { ProcessingQueryStatusTypes } from "interface/ITaskPageDataResponse";
+import { TaskStatus } from "interface/ITaskPageDataResponse";
 
 interface IResultTableProps {
 	results: any;
-	status: ProcessingQueryStatusTypes;
+	status: TaskStatus;
 	taskId: string;
 }
 
