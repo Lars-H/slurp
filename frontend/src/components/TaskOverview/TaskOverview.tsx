@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import PropTypes from "prop-types";
 import {
 	Accordion,
@@ -11,14 +11,15 @@ import {
 	Flex,
 	Badge,
 	ExpandedIndex,
+	Heading,
 } from "@chakra-ui/react";
 import ColoredExecutionPlanner from "components/ExecutionPlanner/ColoredExecutionPlanner";
 import MetaBadges from "components/MetaBadges/MetaBadges";
 import QueryEditor from "components/QueryEditor/QueryEditor";
 import ResultTable from "components/ResultTable/ResultTable";
-import { timeConverter } from "utils/utils";
+import {timeConverter} from "utils/utils";
 import BinaryTree from "utils/DataStructures/binaryTree";
-import { ITaskPageDataResponse } from "interface/ITaskPageDataResponse";
+import {ITaskPageDataResponse} from "interface/ITaskPageDataResponse";
 
 interface ITaskOverviewProps extends Partial<ITaskPageDataResponse> {
 	splitView: boolean;
@@ -61,12 +62,24 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 			{props.query && props._id && props.status && (
 				<Accordion
 					allowToggle
-					defaultIndex={[0, 3]}
 					index={props.extendedItems}
 					allowMultiple
 					width={props.splitView ? "50%" : "100%"}
 					onChange={(extendedItems) => props.updateExtendedItems(extendedItems)}
 				>
+
+					<Box pl="16px" mb="8px">
+						<Heading as="h1" size="md" mb="16px">
+							Task {props._id}
+						</Heading>
+						{props.query_name && (
+							<Heading mr="1" size="sm">
+								Name: {props.query_name}
+							</Heading>
+						)}
+					</Box>
+
+
 					<AccordionItem>
 						<AccordionButton>
 							<Box flex="1" textAlign="left">

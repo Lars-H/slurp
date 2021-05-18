@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import api from "utils/axios-config";
 import {
 	Stack,
@@ -16,10 +16,10 @@ import {
 } from "@chakra-ui/react";
 import BinaryTree from "utils/DataStructures/binaryTree";
 import Alert from "components/Alert/Alert";
-import withAlert, { IAlertProps } from "components/HoCs/withAlert";
-import { deepCompare } from "utils/utils";
-import { RouteComponentProps } from "react-router-dom";
-import { ITaskPageDataResponse } from "interface/ITaskPageDataResponse";
+import withAlert, {IAlertProps} from "components/HoCs/withAlert";
+import {deepCompare} from "utils/utils";
+import {RouteComponentProps} from "react-router-dom";
+import {ITaskPageDataResponse} from "interface/ITaskPageDataResponse";
 import TaskOverview from "components/TaskOverview/TaskOverview";
 
 interface IMatchParams {
@@ -56,7 +56,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 		fetchingResults: false,
 		executionsForSameQuery: [],
 		isComparingExecutionPlans: false,
-		syncedExtendedAccordionItems: [],
+		syncedExtendedAccordionItems: [0, 3],
 	};
 
 	getTaskInfo = async () => {
@@ -75,7 +75,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 				.then((response) => {
 					this.setState(response.data);
 					console.log(response.data);
-					this.setState({ ...response.data });
+					this.setState({...response.data});
 
 					setTimeout(() => {
 						this.getTaskInfo();
@@ -124,7 +124,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 		let response;
 		try {
 			response = await api.getExecutionsForIdenticalQuery(payload);
-			this.setState({ executionsForSameQuery: response.data });
+			this.setState({executionsForSameQuery: response.data});
 		} catch (err) {
 			console.log(err);
 		}
@@ -208,97 +208,84 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 		return (
 			<>
 				{this.state.query ? (
-					<>
-						<Stack>
-							<Flex wrap="wrap" mb="5" align="center" justifyContent="space-between">
-								<Heading as="h1" size="lg">
-									Task {this.state.taskId}
-								</Heading>
+					<Stack>
+						{this.createAlertInfo()}
 
-								{this.state.query_name && (
-									<Heading mr="1" size="md">
-										Name: {this.state.query_name}
-									</Heading>
-								)}
-							</Flex>
-							{this.createAlertInfo()}
-
-							{this.state.executionsForSameQuery.length > 0 && (
-								<Box mt={4}>
-									{this.state.isComparingExecutionPlans ? (
-										<>
-											<Flex>
-												<Select
-													placeholder="Select option"
-													onChange={(evt) =>
-														this.compareWithExecutionPlan(
-															evt.target.value
-														)
-													}
-												>
-													{this.state.executionsForSameQuery.map((el) => {
-														return (
-															<Tooltip key={el._id} label="lol">
-																<option value={el._id}>
-																	{el._id}
-																</option>
-															</Tooltip>
-														);
-													})}
-												</Select>
-												<Button
-													ml={2}
-													onClick={this.toggleCompareExecutions}
-												>
-													Hide
-												</Button>
-											</Flex>
-										</>
-									) : (
+						{this.state.executionsForSameQuery.length > 0 && (
+							<Box mt={4}>
+								{this.state.isComparingExecutionPlans ? (
+									<>
 										<Flex>
-											<Text color="gray.400" fontSize="18px">
-												There are different execution plans for the same
-												query
-											</Text>
+											<Select
+												placeholder="Select option"
+												onChange={(evt) =>
+													this.compareWithExecutionPlan(
+														evt.target.value
+													)
+												}
+											>
+												{this.state.executionsForSameQuery.map((el) => {
+													return (
+														<Tooltip key={el._id} label="lol">
+															<option value={el._id}>
+																{el._id}
+															</option>
+														</Tooltip>
+													);
+												})}
+											</Select>
 											<Button
-												display="inline"
+												ml={2}
 												onClick={this.toggleCompareExecutions}
 											>
-												Compare
-											</Button>
+												Hide
+												</Button>
 										</Flex>
-									)}
-								</Box>
-							)}
-
-							<Flex>
-								{this.state.comparandExecutionPlan ? (
-									<>
-										<TaskOverview
-											{...this.state}
-											splitView={splitViewActive}
-											extendedItems={this.state.syncedExtendedAccordionItems}
-											updateExtendedItems={this.updateExtendedItems}
-										/>
-										<Box marginLeft="32px"></Box>
-										<TaskOverview
-											{...this.state.comparandExecutionPlan}
-											splitView={splitViewActive}
-											extendedItems={this.state.syncedExtendedAccordionItems}
-											updateExtendedItems={this.updateExtendedItems}
-										/>
 									</>
 								) : (
+									<Flex>
+										<Text color="gray.400" fontSize="18px">
+											There are different execution plans for the same
+											query
+											</Text>
+										<Button
+											display="inline"
+											onClick={this.toggleCompareExecutions}
+										>
+											Compare
+											</Button>
+									</Flex>
+								)}
+							</Box>
+						)}
+
+						<Flex>
+							{this.state.comparandExecutionPlan ? (
+								<>
 									<TaskOverview
 										{...this.state}
 										splitView={splitViewActive}
 										extendedItems={this.state.syncedExtendedAccordionItems}
 										updateExtendedItems={this.updateExtendedItems}
 									/>
-								)}
-							</Flex>
-						</Stack>
-					</>
+									<Box marginLeft="32px"></Box>
+									<TaskOverview
+										{...this.state.comparandExecutionPlan}
+										splitView={splitViewActive}
+										extendedItems={this.state.syncedExtendedAccordionItems}
+										updateExtendedItems={this.updateExtendedItems}
+									/>
+								</>
+							) : (
+								<TaskOverview
+									{...this.state}
+									splitView={splitViewActive}
+									extendedItems={this.state.syncedExtendedAccordionItems}
+									updateExtendedItems={this.updateExtendedItems}
+								/>
+							)}
+						</Flex>
+					</Stack>
 				) : (
 					<Center>
 						<Spinner mt="10" size="xl" />
