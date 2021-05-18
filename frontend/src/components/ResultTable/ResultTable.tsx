@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
-
-import "@triply/yasr/build/yasr.min.css";
 import Yasr from "@triply/yasr";
+import "@triply/yasr/build/yasr.min.css";
+
+import React, { useState, useEffect, useRef } from "react";
 import { ProcessingQueryStatusTypes } from "interface/ITaskPageDataResponse";
 
 interface IResultTableProps {
@@ -45,14 +45,6 @@ function ResultTable(props: IResultTableProps) {
 			updateResults(yasr);
 		}
 	}, [props.results]);
-
-	// const isFetchingYetNoResults = () => {
-	//   logger('evaluating')
-	//   const {status, results} = props;
-	//   const resultExists = results.results && results.results.bindings && results.results.bindings.length === 0
-	//   logger(status === "pending" && resultExists)
-	//   return (status === "pending" && resultExists);
-	// };
 
 	return (
 		<>

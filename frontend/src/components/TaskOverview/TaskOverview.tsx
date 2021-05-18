@@ -10,6 +10,7 @@ import {
 	Stack,
 	Flex,
 	Badge,
+	ExpandedIndex,
 } from "@chakra-ui/react";
 import ColoredExecutionPlanner from "components/ExecutionPlanner/ColoredExecutionPlanner";
 import MetaBadges from "components/MetaBadges/MetaBadges";
@@ -19,7 +20,11 @@ import { timeConverter } from "utils/utils";
 import BinaryTree from "utils/DataStructures/binaryTree";
 import { ITaskPageDataResponse } from "interface/ITaskPageDataResponse";
 
-interface ITaskOverviewProps extends Partial<ITaskPageDataResponse> {}
+interface ITaskOverviewProps extends Partial<ITaskPageDataResponse> {
+	splitView: boolean;
+	extendedItems: ExpandedIndex;
+	updateExtendedItems: (extendedItems: ExpandedIndex) => void;
+}
 
 const TaskOverview = (props: ITaskOverviewProps) => {
 	const [cyPlan, setCyPlan] = useState();
@@ -27,6 +32,11 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 	useEffect(() => {
 		transformExecutionPlanForCy();
 	}, [props.plan]);
+
+	useEffect(() => {
+		console.log(props._id);
+		console.log(props.extendedItems);
+	}, [props.extendedItems]);
 
 	const transformExecutionPlanForCy = () => {
 		if (props.plan && props.query) {
@@ -48,8 +58,15 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 
 	return (
 		<>
-			{props.query && props._id && (
-				<Accordion defaultIndex={[0, 3]} allowMultiple>
+			{props.query && props._id && props.status && (
+				<Accordion
+					allowToggle
+					defaultIndex={[0, 3]}
+					index={props.extendedItems}
+					allowMultiple
+					width={props.splitView ? "50%" : "100%"}
+					onChange={(extendedItems) => props.updateExtendedItems(extendedItems)}
+				>
 					<AccordionItem>
 						<AccordionButton>
 							<Box flex="1" textAlign="left">

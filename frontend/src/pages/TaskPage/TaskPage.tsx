@@ -4,12 +4,7 @@ import {
 	Stack,
 	Spinner,
 	Badge,
-	AccordionItem,
-	Accordion,
-	AccordionButton,
 	Box,
-	AccordionIcon,
-	AccordionPanel,
 	Center,
 	Text,
 	Flex,
@@ -17,15 +12,11 @@ import {
 	Select,
 	Button,
 	Tooltip,
+	ExpandedIndex,
 } from "@chakra-ui/react";
 import BinaryTree from "utils/DataStructures/binaryTree";
-import { timeConverter } from "../../utils/utils";
-import ColoredExecutionPlanner from "components/ExecutionPlanner/ColoredExecutionPlanner";
-import ResultTable from "components/ResultTable/ResultTable";
-import QueryEditor from "components/QueryEditor/QueryEditor";
 import Alert from "components/Alert/Alert";
 import withAlert, { IAlertProps } from "components/HoCs/withAlert";
-import MetaBadges from "components/MetaBadges/MetaBadges";
 import { deepCompare } from "utils/utils";
 import { RouteComponentProps } from "react-router-dom";
 import { ITaskPageDataResponse } from "interface/ITaskPageDataResponse";
@@ -45,6 +36,7 @@ interface ITaskPageState extends Partial<ITaskPageDataResponse> {
 	executionsForSameQuery: Partial<ITaskPageDataResponse>[];
 	isComparingExecutionPlans: boolean;
 	comparandExecutionPlan?: Partial<ITaskPageDataResponse>;
+	syncedExtendedAccordionItems: ExpandedIndex;
 }
 
 const RETRIEVE_RESULTS_INTERVAL = 5000;
@@ -64,6 +56,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 		fetchingResults: false,
 		executionsForSameQuery: [],
 		isComparingExecutionPlans: false,
+		syncedExtendedAccordionItems: [],
 	};
 
 	getTaskInfo = async () => {
@@ -184,7 +177,10 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 	};
 
 	toggleCompareExecutions = () => {
-		this.setState({ isComparingExecutionPlans: !this.state.isComparingExecutionPlans });
+		this.setState({
+			isComparingExecutionPlans: !this.state.isComparingExecutionPlans,
+			comparandExecutionPlan: undefined,
+		});
 	};
 
 	compareWithExecutionPlan = (id: string) => {
@@ -196,11 +192,19 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 		if (comparandIndex !== -1) {
 			this.setState({
 				comparandExecutionPlan: this.state.executionsForSameQuery[comparandIndex],
+				syncedExtendedAccordionItems: [],
 			});
 		}
 	};
 
+	updateExtendedItems = (extendedItems: ExpandedIndex) => {
+		this.setState({
+			syncedExtendedAccordionItems: extendedItems,
+		});
+	};
+
 	render() {
+		const splitViewActive = typeof this.state.comparandExecutionPlan !== "undefined";
 		return (
 			<>
 				{this.state.query ? (
@@ -219,52 +223,81 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 							</Flex>
 							{this.createAlertInfo()}
 
-							<TaskOverview {...this.state} />
-							{/* <TaskOverview {...this.state} _id="wegweg" /> */}
-						</Stack>
-
-						{this.state.executionsForSameQuery.length > 0 && (
-							<Box mt={4}>
-								{this.state.isComparingExecutionPlans ? (
-									<>
+							{this.state.executionsForSameQuery.length > 0 && (
+								<Box mt={4}>
+									{this.state.isComparingExecutionPlans ? (
+										<>
+											<Flex>
+												<Select
+													placeholder="Select option"
+													onChange={(evt) =>
+														this.compareWithExecutionPlan(
+															evt.target.value
+														)
+													}
+												>
+													{this.state.executionsForSameQuery.map((el) => {
+														return (
+															<Tooltip key={el._id} label="lol">
+																<option value={el._id}>
+																	{el._id}
+																</option>
+															</Tooltip>
+														);
+													})}
+												</Select>
+												<Button
+													ml={2}
+													onClick={this.toggleCompareExecutions}
+												>
+													Hide
+												</Button>
+											</Flex>
+										</>
+									) : (
 										<Flex>
-											<Select
-												placeholder="Select option"
-												onChange={(evt) =>
-													this.compareWithExecutionPlan(evt.target.value)
-												}
+											<Text color="gray.400" fontSize="18px">
+												There are different execution plans for the same
+												query
+											</Text>
+											<Button
+												display="inline"
+												onClick={this.toggleCompareExecutions}
 											>
-												{this.state.executionsForSameQuery.map((el) => {
-													return (
-														<Tooltip key={el._id} label="lol">
-															<option value={el._id}>{el._id}</option>
-														</Tooltip>
-													);
-												})}
-											</Select>
-											<Button ml={2} onClick={this.toggleCompareExecutions}>
-												Hide
+												Compare
 											</Button>
 										</Flex>
-										{this.state.comparandExecutionPlan && (
-											<TaskOverview {...this.state.comparandExecutionPlan} />
-										)}
+									)}
+								</Box>
+							)}
+
+							<Flex>
+								{this.state.comparandExecutionPlan ? (
+									<>
+										<TaskOverview
+											{...this.state}
+											splitView={splitViewActive}
+											extendedItems={this.state.syncedExtendedAccordionItems}
+											updateExtendedItems={this.updateExtendedItems}
+										/>
+										<Box marginLeft="32px"></Box>
+										<TaskOverview
+											{...this.state.comparandExecutionPlan}
+											splitView={splitViewActive}
+											extendedItems={this.state.syncedExtendedAccordionItems}
+											updateExtendedItems={this.updateExtendedItems}
+										/>
 									</>
 								) : (
-									<Flex>
-										<Text color="gray.400" fontSize="18px">
-											There are different execution plans for the same query
-										</Text>
-										<Button
-											display="inline"
-											onClick={this.toggleCompareExecutions}
-										>
-											Compare
-										</Button>
-									</Flex>
+									<TaskOverview
+										{...this.state}
+										splitView={splitViewActive}
+										extendedItems={this.state.syncedExtendedAccordionItems}
+										updateExtendedItems={this.updateExtendedItems}
+									/>
 								)}
-							</Box>
-						)}
+							</Flex>
+						</Stack>
 					</>
 				) : (
 					<Center>
