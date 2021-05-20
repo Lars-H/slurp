@@ -8,6 +8,7 @@ interface IResultTableProps {
 	results: any;
 	status: TaskStatus;
 	taskId: string;
+	opened: boolean;
 }
 
 function ResultTable(props: IResultTableProps) {
@@ -45,6 +46,10 @@ function ResultTable(props: IResultTableProps) {
 			updateResults(yasr);
 		}
 	}, [props.results]);
+
+	useEffect(() => {
+		props.opened && yasr && yasr.draw();
+	}, [props.opened]);
 
 	return (
 		<>

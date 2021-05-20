@@ -1,4 +1,5 @@
-import {useEffect, useRef, useState} from "react";
+/* eslint-disable react/react-in-jsx-scope */
+import { useEffect, useRef, useState } from "react";
 import {
 	Accordion,
 	AccordionItem,
@@ -16,12 +17,12 @@ import ColoredExecutionPlanner from "components/ExecutionPlanner/ColoredExecutio
 import MetaBadges from "components/MetaBadges/MetaBadges";
 import QueryEditor from "components/QueryEditor/QueryEditor";
 import ResultTable from "components/ResultTable/ResultTable";
-import {timeConverter} from "utils/utils";
+import { timeConverter } from "utils/utils";
 import BinaryTree from "utils/DataStructures/binaryTree";
-import {ITaskPageDataResponse, TaskStatus} from "interface/ITaskPageDataResponse";
-import {NoResultsAccordionItem} from "./NoResultsAccordionItem";
+import { ITaskPageDataResponse, TaskStatus } from "interface/ITaskPageDataResponse";
+import { NoResultsAccordionItem } from "./NoResultsAccordionItem";
 
-export type OverviewElements = 'heading' | 'info' | 'query' | 'plan' | 'results';
+export type OverviewElements = "heading" | "info" | "query" | "plan" | "results";
 
 // enum OverviewElements {
 // 	heading = 'heading',
@@ -35,7 +36,7 @@ interface ITaskOverviewProps extends ITaskPageDataResponse {
 	extendedItems: ExpandedIndex;
 	updateExtendedItems: (extendedItems: ExpandedIndex) => void;
 	heights?: Record<OverviewElements, number>;
-	updateHeights?: any
+	updateHeights?: any;
 }
 
 const TaskOverview = (props: ITaskOverviewProps) => {
@@ -46,7 +47,7 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 		query: 0,
 		plan: 0,
 		results: 0,
-	})
+	});
 
 	const references: Record<OverviewElements, React.RefObject<HTMLDivElement>> = {
 		heading: useRef<HTMLDivElement>(null),
@@ -54,7 +55,7 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 		query: useRef<HTMLDivElement>(null),
 		plan: useRef<HTMLDivElement>(null),
 		results: useRef<HTMLDivElement>(null),
-	}
+	};
 
 	useEffect(() => {
 		transformExecutionPlanForCy();
@@ -64,7 +65,7 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 		if (props.heights) {
 			setHeights(props.heights);
 		}
-	}, [props.heights])
+	}, [props.heights]);
 
 	useEffect(() => {
 		const currentHeights = {};
@@ -75,7 +76,7 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 		});
 
 		props.updateHeights && props.updateHeights(currentHeights);
-	})
+	});
 
 	const transformExecutionPlanForCy = () => {
 		const tree = new BinaryTree();
@@ -83,6 +84,14 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 		const treeElements = tree.getElements();
 
 		setCyPlan(treeElements);
+	};
+
+	const isResultTableOpened = () => {
+		if (Array.isArray(props.extendedItems)) {
+			return props.extendedItems.includes(3);
+		} else {
+			return props.extendedItems === 3;
+		}
 	};
 
 	const noResultsAfterQueryFinished =
@@ -97,7 +106,6 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 			width={props.splitView ? "50%" : "100%"}
 			onChange={(extendedItems) => props.updateExtendedItems(extendedItems)}
 		>
-
 			<Box pl="16px" mb="8px" ref={references.heading} minHeight={heights.heading}>
 				<Heading as="h1" size="md" mb="16px">
 					Task {props._id}
@@ -113,7 +121,7 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 				<AccordionButton>
 					<Box flex="1" textAlign="left">
 						Information
-							</Box>
+					</Box>
 					<AccordionIcon />
 				</AccordionButton>
 				<AccordionPanel pb={4} ref={references.info} minHeight={heights.info}>
@@ -141,7 +149,7 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 				<AccordionButton>
 					<Box flex="1" textAlign="left">
 						Query
-							</Box>
+					</Box>
 					<AccordionIcon />
 				</AccordionButton>
 				<AccordionPanel pb={4} ref={references.query} minHeight={heights.query}>
@@ -153,7 +161,7 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 				<AccordionButton>
 					<Box flex="1" textAlign="left">
 						Execution Plan
-							</Box>
+					</Box>
 					<AccordionIcon />
 				</AccordionButton>
 				<AccordionPanel pb={4} ref={references.plan} minHeight={heights.plan}>
@@ -168,7 +176,7 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 					<AccordionButton>
 						<Box flex="1" textAlign="left">
 							Results
-								</Box>
+						</Box>
 						<AccordionIcon />
 					</AccordionButton>
 					<AccordionPanel pb={4} ref={references.results} minHeight={heights.results}>
@@ -176,6 +184,7 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 							results={props.sparql_results}
 							status={props.status}
 							taskId={props._id}
+							opened={isResultTableOpened()}
 						/>
 					</AccordionPanel>
 				</AccordionItem>
