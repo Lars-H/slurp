@@ -18,7 +18,7 @@ import withAlert, {IAlertProps} from "components/HoCs/withAlert";
 import {deepCompare} from "utils/utils";
 import {RouteComponentProps} from "react-router-dom";
 import {ITaskPageDataResponse, TaskStatus} from "interface/ITaskPageDataResponse";
-import TaskOverview from "components/TaskOverview/TaskOverview";
+import TaskOverview, {OverviewElements} from "components/TaskOverview/TaskOverview";
 
 interface IMatchParams {
 	taskId: string;
@@ -36,6 +36,8 @@ interface ITaskPageState {
 	isComparingExecutionPlans: boolean;
 	comparandExecutionPlan?: ITaskPageDataResponse;
 	syncedExtendedAccordionItems: ExpandedIndex;
+
+	splitViewMaxHeights: Record<OverviewElements, number>;
 }
 
 const RETRIEVE_RESULTS_INTERVAL = 5000;
@@ -48,6 +50,13 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 		executionsForSameQuery: [],
 		isComparingExecutionPlans: false,
 		syncedExtendedAccordionItems: [0, 3],
+		splitViewMaxHeights: {
+			heading: 0,
+			info: 0,
+			query: 0,
+			plan: 0,
+			results: 0,
+		},
 	};
 
 	getTaskInfo = async () => {
@@ -202,6 +211,21 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 		});
 	};
 
+	updateSplitViewHeights = (taskOverviewHeights: Record<OverviewElements, number>) => {
+		const newHeights = {...this.state.splitViewMaxHeights}
+		Object.entries(taskOverviewHeights).forEach(([key, value]) => {
+			if (this.state.splitViewMaxHeights[key] < value) {
+				this.setState({
+					...this.state,
+					splitViewMaxHeights: {
+						...this.state.splitViewMaxHeights,
+						[key]: value,
+					}
+				});
+			}
+		});
+	}
+
 	render() {
 		const splitViewActive = typeof this.state.comparandExecutionPlan !== "undefined";
 		return (
@@ -266,6 +290,8 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 										splitView={splitViewActive}
 										extendedItems={this.state.syncedExtendedAccordionItems}
 										updateExtendedItems={this.updateExtendedItems}
+										updateHeights={this.updateSplitViewHeights}
+										heights={this.state.splitViewMaxHeights}
 									/>
 									<Box marginLeft="32px"></Box>
 									<TaskOverview
@@ -273,6 +299,8 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 										splitView={splitViewActive}
 										extendedItems={this.state.syncedExtendedAccordionItems}
 										updateExtendedItems={this.updateExtendedItems}
+										updateHeights={this.updateSplitViewHeights}
+										heights={this.state.splitViewMaxHeights}
 									/>
 								</>
 							) : (
