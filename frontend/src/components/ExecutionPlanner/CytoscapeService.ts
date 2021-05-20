@@ -1,11 +1,11 @@
 import cloneDeep from "lodash/cloneDeep";
-import { v4 as uuidv4 } from "uuid";
+import {v4 as uuidv4} from "uuid";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
-import { nodeMenu, coreMenu } from "./cy-cxtmenu";
-import { convertSpecialCharsToHTML } from "../../utils/utils";
+import {nodeMenu, coreMenu} from "./cy-cxtmenu";
+import {convertSpecialCharsToHTML} from "../../utils/utils";
 import BinaryTree from "utils/DataStructures/binaryTree";
-import { InvalidExecutionPlanError } from "./InvalidExecutionPlanError";
+import {InvalidExecutionPlanError} from "./InvalidExecutionPlanError";
 import {
 	CollectionReturnValue,
 	EventObject,
@@ -285,8 +285,8 @@ export class CytoscapeService {
 		target.addClass("selected-for-swap");
 	};
 
-	/** 
-		Create HTML Content for the generated Tippy on hover of a node. 
+	/**
+		Create HTML Content for the generated Tippy on hover of a node.
 		Content is generic since it renders all key, value pairs which it receives from the backend (except default keys like id etc.)
 	*/
 	createTippyContent = (node: NodeSingular): HTMLDivElement | undefined => {
@@ -315,7 +315,9 @@ export class CytoscapeService {
 					}
 					break;
 				case "estimated_tuples":
-					child.innerHTML = `<b>Estimated Join Cardinality</b>: ${value}<br/>`;
+					if (this.mode === 'edit') {
+						child.innerHTML = `<b>Estimated Join Cardinality</b>: ${value}<br/>`;
+					}
 					break;
 				case "tpf":
 					// TODO RENAME TO TP
@@ -615,11 +617,11 @@ export class CytoscapeService {
 		this.cy.add([
 			{
 				group: "edges",
-				data: { source: joinID, target: root1.data("id") },
+				data: {source: joinID, target: root1.data("id")},
 			},
 			{
 				group: "edges",
-				data: { source: joinID, target: root2.data("id") },
+				data: {source: joinID, target: root2.data("id")},
 			},
 		]);
 

@@ -18,7 +18,6 @@ import cyStyleLight from "./cy-style-light";
 import HelpModal from "./HelpModal";
 import CytoscapeComponent from "react-cytoscapejs";
 
-const cytoscapeService = new CytoscapeService();
 const MODE_EDIT = "edit";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MODE_VIEW = "view";
@@ -37,10 +36,12 @@ interface IExecutionPlannerProps {
 class ExecutionPlanner extends Component<IAlertProps & IExecutionPlannerProps> {
 	cy?: cytoscape.Core;
 	cyRef: React.RefObject<HTMLDivElement>;
+	cyService: CytoscapeService;
 
 	constructor(props: IAlertProps & IExecutionPlannerProps) {
 		super(props);
 		this.cyRef = createRef();
+		this.cyService = new CytoscapeService();
 	}
 	state = {
 		cyContainerStyle: {
@@ -63,7 +64,7 @@ class ExecutionPlanner extends Component<IAlertProps & IExecutionPlannerProps> {
 		if (this.props.mode === MODE_EDIT && this.cyRef.current) {
 			cyMaxWidth = this.cyRef.current.offsetWidth;
 		}
-		cytoscapeService.registerCytoscapeInstance(
+		this.cyService.registerCytoscapeInstance(
 			cy,
 			this.props.mode,
 			this.props.suggestedExecutionPlan,
@@ -77,7 +78,7 @@ class ExecutionPlanner extends Component<IAlertProps & IExecutionPlannerProps> {
 		if (this.cy) {
 			Object.getPrototypeOf(this.cy)[cxtmenu] = null;
 		}
-		cytoscapeService.unregisterService();
+		this.cyService.unregisterService();
 
 		if (this.props.mode === MODE_EDIT) {
 			window.removeEventListener("resize", this.updateCyMaxWidth);
@@ -91,14 +92,14 @@ class ExecutionPlanner extends Component<IAlertProps & IExecutionPlannerProps> {
 			!deepCompare(prevProps.suggestedExecutionPlan, this.props.suggestedExecutionPlan) &&
 			prevProps.suggestedExecutionPlan
 		) {
-			cytoscapeService.updateCyContainer();
+			this.cyService.updateCyContainer();
 		}
 	};
 
 	executePlan = () => {
 		let executionPlanJSON;
 		try {
-			executionPlanJSON = cytoscapeService.getExecutionPlan();
+			executionPlanJSON = this.cyService.getExecutionPlan();
 			this.props.setAlert(null);
 			this.props.executePlan(executionPlanJSON);
 		} catch (err) {
@@ -117,7 +118,7 @@ class ExecutionPlanner extends Component<IAlertProps & IExecutionPlannerProps> {
 	}
 	updateCyMaxWidth = () => {
 		if (this.cyRef && this.cyRef.current) {
-			cytoscapeService.updateMaxWidth(this.cyRef.current.offsetWidth);
+			this.cyService.updateMaxWidth(this.cyRef.current.offsetWidth);
 		}
 	};
 
