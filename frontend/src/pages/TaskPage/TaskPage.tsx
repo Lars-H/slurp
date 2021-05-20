@@ -80,16 +80,8 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 					}, RETRIEVE_RESULTS_INTERVAL);
 
 					this.fetchDifferentExececutionPlansForIdenticalQuery();
-
-					this.setState({
-						fetchingResults: false,
-					});
 				})
 				.catch((err) => {
-					this.setState({
-						fetchingResults: false,
-					});
-
 					// Generate Alert Message
 					const errData = err.response.data;
 					if (errData && errData.msg && errData.title) {
@@ -99,11 +91,11 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 						});
 					}
 				});
-		} else {
-			this.setState({
-				fetchingResults: false,
-			});
 		}
+
+		this.setState({
+			fetchingResults: false,
+		});
 	};
 
 	fetchDifferentExececutionPlansForIdenticalQuery = async () => {
@@ -127,17 +119,16 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 
 	transformExecutionPlanForCy = () => {
 		const task = this.state.task;
-		if (task) {
-			const tree = new BinaryTree();
-			tree.buildTreeFromExecutionPlan(task.plan, task.query);
-			const treeElements = tree.getElements();
-
-			this.setState({
-				planCy: treeElements,
-			});
-		} else {
-			console.log("Error. Execution plan or Query not available");
+		if (!task) {
+			throw new Error('No task available');
 		}
+
+		const tree = new BinaryTree();
+		tree.buildTreeFromExecutionPlan(task.plan, task.query);
+		const treeElements = tree.getElements();
+		this.setState({
+			planCy: treeElements,
+		});
 	};
 
 	componentDidMount = async () => {
