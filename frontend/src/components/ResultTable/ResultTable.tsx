@@ -48,6 +48,10 @@ function ResultTable(props: IResultTableProps) {
 	}, [props.results]);
 
 	useEffect(() => {
+		// Workaround: rerender the table to show the borders.
+		// Sessionstorage is cleared because it contains vertical border starting points.
+		// Some cells might yet still be hidden if resolution is too low.
+		sessionStorage.clear();
 		props.opened && yasr && yasr.draw();
 	}, [props.opened]);
 
