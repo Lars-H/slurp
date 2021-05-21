@@ -11,6 +11,7 @@ import {
 	Button,
 	Tooltip,
 	ExpandedIndex,
+	Heading,
 } from "@chakra-ui/react";
 import BinaryTree from "utils/DataStructures/binaryTree";
 import Alert from "components/Alert/Alert";
@@ -20,6 +21,7 @@ import { RouteComponentProps } from "react-router-dom";
 import { ITaskPageDataResponse, TaskStatus } from "interface/ITaskPageDataResponse";
 import TaskOverview, { OverviewElements } from "components/TaskOverview/TaskOverview";
 import TwoTasksComparison from "components/TaskOverview/TwoTasksComparison";
+import { throws } from "node:assert";
 
 interface IMatchParams {
 	taskId: string;
@@ -35,11 +37,14 @@ interface ITaskPageState {
 
 	executionsForSameQuery: ITaskPageDataResponse[];
 	isComparingExecutionPlans: boolean;
-	comparandExecutionPlan?: ITaskPageDataResponse;
 	syncedExtendedAccordionItems: ExpandedIndex;
 }
 
 const RETRIEVE_RESULTS_INTERVAL = 5000;
+
+const hasTaskFinished = (status: TaskStatus) => {
+	return [TaskStatus.done, TaskStatus.timeout, TaskStatus.failed].includes(status);
+};
 
 class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 	state: ITaskPageState = {
@@ -170,79 +175,54 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 	toggleCompareExecutions = () => {
 		this.setState({
 			isComparingExecutionPlans: !this.state.isComparingExecutionPlans,
-			comparandExecutionPlan: undefined,
 		});
 	};
 
-	compareWithExecutionPlan = (id: string) => {
-		if (!this.state.executionsForSameQuery) {
-			return;
-		}
-		const comparandIndex = this.state.executionsForSameQuery.findIndex((el) => el._id === id);
-
-		if (comparandIndex !== -1) {
-			this.setState({
-				comparandExecutionPlan: this.state.executionsForSameQuery[comparandIndex],
-				syncedExtendedAccordionItems: [],
-			});
-		}
-	};
-
 	render() {
-		const splitViewActive = typeof this.state.comparandExecutionPlan !== "undefined";
 		return (
 			<>
 				{this.state.task ? (
 					<Stack>
 						{this.createAlertInfo()}
 
-						{this.state.executionsForSameQuery.length > 0 && (
-							<Box mt={4}>
-								{this.state.isComparingExecutionPlans ? (
-									<>
-										<Flex>
-											<Select
-												placeholder="Select option"
-												onChange={(evt) =>
-													this.compareWithExecutionPlan(evt.target.value)
-												}
-											>
-												{this.state.executionsForSameQuery.map((el) => {
-													return (
-														<Tooltip key={el._id} label="lol">
-															<option value={el._id}>{el._id}</option>
-														</Tooltip>
-													);
-												})}
-											</Select>
-											<Button ml={2} onClick={this.toggleCompareExecutions}>
-												Hide
-											</Button>
-										</Flex>
-									</>
-								) : (
-									<Flex>
-										<Text color="gray.400" fontSize="18px">
-											There are different execution plans for the same query
-										</Text>
-										<Button
-											display="inline"
-											onClick={this.toggleCompareExecutions}
-										>
-											Compare
-										</Button>
-									</Flex>
-								)}
-							</Box>
-						)}
-
-						{this.state.comparandExecutionPlan ? (
+						{this.state.isComparingExecutionPlans ? (
 							<TwoTasksComparison
 								first={this.state.task}
-								second={this.state.comparandExecutionPlan}
+								others={this.state.executionsForSameQuery}
+								leaveComparison={this.toggleCompareExecutions}
 							/>
 						) : (
-							<TaskOverview {...this.state.task} splitView={splitViewActive} />
+							<>
+								<Box pl="16px" mb="16px">
+									<Flex alignContent="center" mb="16px" justifyContent='space-between'>
+										<Heading as="h1" size="md" marginY="auto">
+											Task {this.state.task._id}
+										</Heading>
+										{this.state.executionsForSameQuery.length > 0 &&
+											!this.state.isComparingExecutionPlans &&
+											hasTaskFinished(this.state.task.status) && (
+												<Box>
+													<Flex>
+														<Button
+															display="inline"
+															colorScheme="gray"
+															onClick={this.toggleCompareExecutions}
+														>
+															Compare with other plans
+														</Button>
+													</Flex>
+												</Box>
+											)}
+									</Flex>
+									{this.state.task.query_name && (
+										<Heading mr="1" size="sm">
+											Name: {this.state.task.query_name}
+										</Heading>
+									)}
+								</Box>
+
+								<TaskOverview {...this.state.task} splitView={false} />
+							</>
 						)}
 					</Stack>
 				) : (

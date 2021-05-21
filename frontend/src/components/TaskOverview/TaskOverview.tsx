@@ -103,26 +103,13 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 
 		if ("extendedItems" in props && "updateExtendedItems" in props) {
 			Object.assign(accordionProps, {
-				width: "50%",
 				onChange: (extendedItems) => {
 					props.updateExtendedItems && props.updateExtendedItems(extendedItems);
-
-					const currentHeights = {};
-					Object.keys(references).forEach((key) => {
-						if (references[key as OverviewElements].current) {
-							currentHeights[key] =
-								references[key as OverviewElements].current?.offsetHeight;
-						}
-					});
-
-					console.log("update");
-					props.updateHeights && props.updateHeights(currentHeights);
 				},
 				index: props.extendedItems,
 			});
 		} else {
 			Object.assign(accordionProps, {
-				width: "100%",
 				defaultIndex: [0, 3],
 			});
 		}
@@ -135,19 +122,6 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 
 	return (
 		<Accordion {...getAccordionProps()}>
-			<Box pl="16px" mb="8px">
-				<Box ref={references.heading} minHeight={heights.heading} key={props._id}>
-					<Heading as="h1" size="md" mb="16px">
-						Task {props._id}
-					</Heading>
-					{props.query_name && (
-						<Heading mr="1" size="sm">
-							Name: {props.query_name}
-						</Heading>
-					)}
-				</Box>
-			</Box>
-
 			<AccordionItem>
 				<AccordionButton>
 					<Box flex="1" textAlign="left">
