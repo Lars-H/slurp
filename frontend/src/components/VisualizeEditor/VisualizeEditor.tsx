@@ -15,7 +15,6 @@ import "codemirror/addon/hint/javascript-hint";
 import { Box, Button, Heading } from "@chakra-ui/react";
 import { JSHINT } from "jshint";
 import { AlertContent, renderAlert } from "components/HoCs/withAlert";
-import { logger } from "utils/logger";
 
 declare const window: any;
 window.JSHINT = JSHINT;
@@ -28,7 +27,6 @@ const VisualizeEditor = (props: IVisualizeEditorProps) => {
 	const [execPlan, setExecPlan] = useState<string>("");
 	const [alert, setAlert] = useState<AlertContent | null>(null);
 
-	logger(JSHINT);
 	const onVisualizeClick = () => {
 		if (!execPlan) {
 			setAlert({ title: "Invalid Plan", msg: "No plan was provided", status: "error" });
@@ -68,12 +66,7 @@ const VisualizeEditor = (props: IVisualizeEditorProps) => {
 						lint: true,
 					}}
 					onBeforeChange={(editor, data, value: string) => {
-						logger(editor);
-						logger(data);
 						setExecPlan(value);
-					}}
-					onChange={(editor, data, value) => {
-						// setQuery(query);
 					}}
 				/>
 			</Box>

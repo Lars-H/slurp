@@ -20,8 +20,6 @@ import Alert from "components/Alert/Alert";
 
 import "./QueryEditor.scss";
 
-import { logger } from "utils/logger";
-
 import "@triply/yasqe/build/yasqe.min.css";
 
 import Yasqe from "@triply/yasqe";
@@ -30,24 +28,30 @@ import { AlertContent } from "components/HoCs/withAlert";
 const MODE_EDIT = "edit";
 const MODE_VIEW = "view";
 
-const DEFAULT_SOURCE = "tpf@http://aifb-ls3-vm8.aifb.kit.edu:5000/watdiv";
+const DEFAULT_SOURCE = "tpf@http://fragments.dbpedia.org/2014/en";
 
 const SUPPORTED_QUERY_TYPES = ["SELECT"];
 
-interface IPropsEditMode {
+interface IPropsQueryEditor {
+	taskId?: string;
+}
+
+interface IPropsEditMode extends IPropsQueryEditor {
 	mode: "edit";
 	querySubmitted: boolean;
 	resetSubmition(): void;
 	submitQuery(query: string, sources: string[], optimizerName: string, queryName?: string): void;
 }
 
-interface IPropsViewMode {
+interface IPropsViewMode extends IPropsQueryEditor {
 	mode: "view";
 	query: string;
 }
 
 const QueryEditor = (props: IPropsEditMode | IPropsViewMode) => {
 	const yasqeRef = useRef(null);
+
+	const yasqeId = props.taskId ? `yasqe-${props.taskId}` : `yasqe`;
 
 	const [yasqe, setYasqe] = useState<Yasqe>();
 
@@ -85,7 +89,7 @@ const QueryEditor = (props: IPropsEditMode | IPropsViewMode) => {
 			return DEFAULT_QUERY;
 		})();
 
-		const yasqeElement = document.getElementById("yasqe");
+		const yasqeElement = document.getElementById(yasqeId);
 		if (!yasqeElement) {
 			return;
 		}
@@ -181,8 +185,6 @@ const QueryEditor = (props: IPropsEditMode | IPropsViewMode) => {
 
 			const keywordwithspaces = ` ${keyword} `;
 			if (query.includes(keywordwithspaces)) {
-				logger(keyword);
-				logger(query);
 				return { forbiddenKeywordFound: true, keyword };
 			}
 		}
@@ -193,8 +195,8 @@ const QueryEditor = (props: IPropsEditMode | IPropsViewMode) => {
 	const handleSubmit = () => {
 		if (isQueryValid() && areSourcesValid() && yasqe && props.mode === MODE_EDIT) {
 			const formattedQuery = formatQuery(yasqe.getValue());
-			logger("Formatted Query:");
-			logger(formattedQuery);
+			console.log("Formatted Query:");
+			console.log(formattedQuery);
 
 			yasqe.setValue(formattedQuery);
 
@@ -287,7 +289,7 @@ const QueryEditor = (props: IPropsEditMode | IPropsViewMode) => {
 						setSources={setSources}
 						querySubmitted={props.querySubmitted}
 					/>
-					<div id="yasqe" ref={yasqeRef} />
+					<div id={yasqeId} ref={yasqeRef} />
 					<Flex>
 						<FormControl id="optimizer">
 							<FormLabel>Select Optimizer</FormLabel>
@@ -327,7 +329,7 @@ const QueryEditor = (props: IPropsEditMode | IPropsViewMode) => {
 				</>
 			) : (
 				<>
-					<div id="yasqe" ref={yasqeRef} />
+					<div id={yasqeId} ref={yasqeRef} />
 				</>
 			)}
 		</>

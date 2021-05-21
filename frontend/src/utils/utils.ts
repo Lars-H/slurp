@@ -14,30 +14,11 @@ export const convertSpecialCharsToHTML = (s: string) => {
 	return s;
 };
 
-export const timeConverter = (UNIX_timestamp) => {
-	const a = new Date(UNIX_timestamp * 1000);
-	const months = [
-		"Jan",
-		"Feb",
-		"Mar",
-		"Apr",
-		"May",
-		"Jun",
-		"Jul",
-		"Aug",
-		"Sep",
-		"Oct",
-		"Nov",
-		"Dec",
-	];
-	const year = a.getFullYear();
-	const month = months[a.getMonth()];
-	const date = a.getDate();
-	const hour = a.getHours();
-	const min = a.getMinutes();
-	const sec = a.getSeconds();
-	const time = date + " " + month + " " + year + " " + hour + ":" + min + ":" + sec;
-	return time;
+export const timeConverter = (unixTimestamp) => {
+	const ts = new Date(unixTimestamp * 1000);
+	return `
+	${ts.getFullYear().toString().padStart(4, '0')}-${(ts.getMonth() + 1).toString().padStart(2, '0')}-${ts.getDate().toString().padStart(2, '0')}
+	${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')}:${ts.getSeconds().toString().padStart(2, '0')}`
 };
 
 export const formatQuery = (query: string) => {

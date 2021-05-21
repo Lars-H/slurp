@@ -1,12 +1,11 @@
 import cloneDeep from "lodash/cloneDeep";
-import { v4 as uuidv4 } from "uuid";
-import { logger } from "utils/logger";
+import {v4 as uuidv4} from "uuid";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
-import { nodeMenu, coreMenu } from "./cy-cxtmenu";
-import { convertSpecialCharsToHTML } from "../../utils/utils";
+import {nodeMenu, coreMenu} from "./cy-cxtmenu";
+import {convertSpecialCharsToHTML} from "../../utils/utils";
 import BinaryTree from "utils/DataStructures/binaryTree";
-import { InvalidExecutionPlanError } from "./InvalidExecutionPlanError";
+import {InvalidExecutionPlanError} from "./InvalidExecutionPlanError";
 import {
 	CollectionReturnValue,
 	EventObject,
@@ -286,18 +285,23 @@ export class CytoscapeService {
 		target.addClass("selected-for-swap");
 	};
 
-	/** 
-		Create HTML Content for the generated Tippy on hover of a node. 
+	/**
+		Create HTML Content for the generated Tippy on hover of a node.
 		Content is generic since it renders all key, value pairs which it receives from the backend (except default keys like id etc.)
 	*/
-	createTippyContent = (node: NodeSingular) => {
+	createTippyContent = (node: NodeSingular): HTMLDivElement | undefined => {
 		const ignoreKeys = ["id", "label", "type", "NLJdisabled", "joinOperator"];
-		const content = document.createElement("div");
+		let content: HTMLDivElement | undefined;
 		for (const [key, value] of Object.entries(node.data())) {
 			// Do not show values of those keys.
 			if (ignoreKeys.includes(key)) {
 				continue;
 			}
+
+			if (!content) {
+				content = document.createElement("div");
+			}
+
 			const child = document.createElement("div");
 
 			// Check for known jeys with different wording.
@@ -311,7 +315,9 @@ export class CytoscapeService {
 					}
 					break;
 				case "estimated_tuples":
-					child.innerHTML = `<b>Estimated Join Cardinality</b>: ${value}<br/>`;
+					if (this.mode === 'edit') {
+						child.innerHTML = `<b>Estimated Join Cardinality</b>: ${value}<br/>`;
+					}
 					break;
 				case "tpf":
 					// TODO RENAME TO TP
@@ -338,18 +344,15 @@ export class CytoscapeService {
 	 */
 	handleOnHover = (evt: EventObject) => {
 		const node = evt.target;
-		const ref = node.popperRef(); // used only for positioning
+		const tippyContent = this.createTippyContent(node);
+		if (!tippyContent) {
+			return;
+		}
 
+		const ref = node.popperRef(); // used only for positioning
 		// unfortunately, a dummy element must be passed as tippy only accepts a dom element as the target
 		// https://github.com/atomiks/tippyjs/issues/661
 		const dummyDomEle = document.createElement("div");
-
-		const tipContent = this.createTippyContent(node);
-
-		// Do not show tip if the hovered node does not have any data to show.
-		if (tipContent.children.length === 0) {
-			return;
-		}
 
 		// using tippy@^5.2.1
 		const tip = tippy(dummyDomEle, {
@@ -362,7 +365,7 @@ export class CytoscapeService {
 			}, // needed for `ref` positioning
 			maxWidth: 500,
 			content: () => {
-				return tipContent;
+				return tippyContent;
 			},
 		});
 		tip.show();
@@ -599,14 +602,13 @@ export class CytoscapeService {
 
 		// If two subtrees with each more than one node are joined, then the JOIN is a SHJ, otherwise a NLJ
 		const joinID = uuidv4();
-		const newInnerNode = {
+		const joinOperator = {
 			id: joinID,
-			type: "InnerNode",
+			type: tree1.length > 1 && tree2.length > 1 ? "SHJ" : "NLJ",
 			label: tree1.length > 1 && tree2.length > 1 ? "SHJ" : "NLJ",
-			joinOperator: tree1.length > 1 && tree2.length > 1 ? "SHJ" : "NLJ",
 		};
 		this.cy.add({
-			data: newInnerNode,
+			data: joinOperator,
 			group: "nodes",
 			classes: "center-center",
 		});
@@ -615,11 +617,11 @@ export class CytoscapeService {
 		this.cy.add([
 			{
 				group: "edges",
-				data: { source: joinID, target: root1.data("id") },
+				data: {source: joinID, target: root1.data("id")},
 			},
 			{
 				group: "edges",
-				data: { source: joinID, target: root2.data("id") },
+				data: {source: joinID, target: root2.data("id")},
 			},
 		]);
 
@@ -682,7 +684,6 @@ export class CytoscapeService {
 	};
 
 	isLeaf = (node) => {
-		logger(node.data("type"));
 		return node.data("type") === "Leaf";
 	};
 

@@ -35,11 +35,6 @@ Once all docker containers have been build and started, SLURP is available at:
 http://localhost:3000/
 ```
 
-### Query Runtime
-
-In a local deployment, the maximum runtime (i.e., timeout) can configured in the Celery task source code.
-This requires changing the variable `maximum_time_per_query` in `tasks.py`(in [Line 26](https://github.com/Lars-H/slurp/blob/a7e2828e57aaa8cb9cf14a63e9b8328e7137f349/task_queue/tasks.py#L26)).
-
 
 ## Components
 

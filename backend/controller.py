@@ -13,7 +13,6 @@ backend_logger.setLevel(logging.INFO)
 
 def plan_from_optimizer(query_str, sources, optimizer_dct={}):
 
-
     backend_logger.info("Optimizer Config: {}".format(optimizer_dct))
     optimizer_name = optimizer_dct.get("name", "left-deep")
 
@@ -23,8 +22,9 @@ def plan_from_optimizer(query_str, sources, optimizer_dct={}):
     decomposer_enabled = optimizer_dct.get("decomposer", False)
     pruning_enabled = optimizer_dct.get("pruning", False)
 
-    if optimizer_name == "left-deep" or optimizer_name == "left-linear":
-        optimizer = LDFF_Optimizer(sources=sources, eddies=eddies, pbj=pbj_enabled, decomposer=decomposer_enabled, pruning=pruning_enabled)
+    if optimizer_name == "left-deep":
+        optimizer = LDFF_Optimizer(sources=sources, eddies=eddies, pbj=pbj_enabled,
+                                   decomposer=decomposer_enabled, pruning=pruning_enabled)
 
     elif optimizer_name == "nLDE":
         optimizer = nLDE_Optimizer(sources=sources, eddies=eddies)
@@ -34,7 +34,7 @@ def plan_from_optimizer(query_str, sources, optimizer_dct={}):
         cost_model = CropCostModel()
         robust_model = CropCostModel()
 
-        ## IDP Optimizer Setup
+        # IDP Optimizer Setup
         k = optimizer_dct.get("k", 4)
         top_t = optimizer_dct.get("top_t", 5)
         adaptive_k = optimizer_dct.get("adaptive_k", True)
@@ -50,5 +50,3 @@ def plan_from_optimizer(query_str, sources, optimizer_dct={}):
     query_parsed = parse(query_str)
     plan = optimizer.create_plan(query_parsed)
     return plan
-
-

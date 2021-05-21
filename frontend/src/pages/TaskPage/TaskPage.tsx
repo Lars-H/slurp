@@ -3,29 +3,25 @@ import api from "utils/axios-config";
 import {
 	Stack,
 	Spinner,
-	Badge,
-	AccordionItem,
-	Accordion,
-	AccordionButton,
 	Box,
-	AccordionIcon,
-	AccordionPanel,
 	Center,
+	Text,
 	Flex,
+	Select,
+	Button,
+	Tooltip,
+	ExpandedIndex,
 	Heading,
 } from "@chakra-ui/react";
 import BinaryTree from "utils/DataStructures/binaryTree";
-import { timeConverter } from "../../utils/utils";
-import ColoredExecutionPlanner from "components/ExecutionPlanner/ColoredExecutionPlanner";
-import ResultTable from "components/ResultTable/ResultTable";
-import QueryEditor from "components/QueryEditor/QueryEditor";
 import Alert from "components/Alert/Alert";
 import withAlert, { IAlertProps } from "components/HoCs/withAlert";
-import MetaBadges from "components/MetaBadges/MetaBadges";
 import { deepCompare } from "utils/utils";
 import { RouteComponentProps } from "react-router-dom";
-import { ITaskPageDataResponse } from "interface/ITaskPageDataResponse";
-import { logger } from "utils/logger";
+import { ITaskPageDataResponse, TaskStatus } from "interface/ITaskPageDataResponse";
+import TaskOverview, { OverviewElements } from "components/TaskOverview/TaskOverview";
+import TwoTasksComparison from "components/TaskOverview/TwoTasksComparison";
+import { throws } from "node:assert";
 
 interface IMatchParams {
 	taskId: string;
@@ -33,35 +29,40 @@ interface IMatchParams {
 
 type IMatchProps = RouteComponentProps<IMatchParams>;
 
-interface ITaskPageState extends Partial<ITaskPageDataResponse> {
+interface ITaskPageState {
+	task?: ITaskPageDataResponse;
 	taskId: string;
 	planCy: any;
 	fetchingResults: boolean;
+
+	executionsForSameQuery: ITaskPageDataResponse[];
+	isComparingExecutionPlans: boolean;
+	syncedExtendedAccordionItems: ExpandedIndex;
 }
 
 const RETRIEVE_RESULTS_INTERVAL = 5000;
 
+const hasTaskFinished = (status: TaskStatus) => {
+	return [TaskStatus.done, TaskStatus.timeout, TaskStatus.failed].includes(status);
+};
+
 class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 	state: ITaskPageState = {
 		taskId: this.props.match.params.taskId,
-		plan: null,
 		planCy: null,
-		sources: [],
-		sparql_results: null,
-		query: "",
-		query_name: "",
-		requests: 0,
-		status: undefined,
 		fetchingResults: false,
+		executionsForSameQuery: [],
+		isComparingExecutionPlans: false,
+		syncedExtendedAccordionItems: [0, 3],
 	};
 
 	getTaskInfo = async () => {
 		if (
-			!this.state.status ||
-			this.state.status === "pending" ||
-			this.state.status === "queue"
+			!this.state.task ||
+			this.state.task.status === "pending" ||
+			this.state.task.status === "queue"
 		) {
-			logger(`Fetching results from task ${this.state.taskId}`);
+			console.log(`Fetching results from task ${this.state.taskId}`);
 
 			this.setState({
 				fetchingResults: true,
@@ -69,25 +70,15 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 
 			api.getResult(this.state.taskId)
 				.then((response) => {
-					this.setState(response.data);
-					logger(response.data);
-					this.setState({ ...response.data });
+					this.setState({ task: response.data });
 
 					setTimeout(() => {
 						this.getTaskInfo();
 					}, RETRIEVE_RESULTS_INTERVAL);
 
-					this.setState({
-						fetchingResults: false,
-					});
+					this.fetchDifferentExececutionPlansForIdenticalQuery();
 				})
 				.catch((err) => {
-					// Stop fetching
-					this.setState({
-						fetchingResults: false,
-						status: "failed",
-					});
-
 					// Generate Alert Message
 					const errData = err.response.data;
 					if (errData && errData.msg && errData.title) {
@@ -97,25 +88,44 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 						});
 					}
 				});
-		} else {
-			this.setState({
-				fetchingResults: false,
-			});
+		}
+
+		this.setState({
+			fetchingResults: false,
+		});
+	};
+
+	fetchDifferentExececutionPlansForIdenticalQuery = async () => {
+		if (!this.state.task) {
+			return;
+		}
+
+		const payload = {
+			query_hash: btoa(this.state.task.query_hash),
+			plan_hash: btoa(this.state.task.plan_hash),
+		};
+
+		let response;
+		try {
+			response = await api.getExecutionsForIdenticalQuery(payload);
+			this.setState({ executionsForSameQuery: response.data });
+		} catch (err) {
+			console.log(err);
 		}
 	};
 
 	transformExecutionPlanForCy = () => {
-		if (this.state.plan && this.state.query) {
-			const tree = new BinaryTree();
-			tree.buildTreeFromExecutionPlan(this.state.plan, this.state.query);
-			const treeElements = tree.getElements();
-
-			this.setState({
-				planCy: treeElements,
-			});
-		} else {
-			logger("Error. Execution plan or Query not available");
+		const task = this.state.task;
+		if (!task) {
+			throw new Error("No task available");
 		}
+
+		const tree = new BinaryTree();
+		tree.buildTreeFromExecutionPlan(task.plan, task.query);
+		const treeElements = tree.getElements();
+		this.setState({
+			planCy: treeElements,
+		});
 	};
 
 	componentDidMount = async () => {
@@ -123,13 +133,25 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 	};
 
 	componentDidUpdate = (_: any, prevState: ITaskPageState) => {
-		if (!deepCompare(prevState.plan, this.state.plan)) {
+		const taskCurrentState = this.state.task;
+		const taskPrevState = prevState.task;
+		if (!taskCurrentState || !taskPrevState) {
+			return;
+		}
+
+		if (!deepCompare(taskCurrentState.plan, taskPrevState.plan)) {
 			this.transformExecutionPlanForCy();
 		}
 	};
 
 	createAlertInfo = () => {
-		if (this.state.sparql_results && this.state.status === "pending") {
+		if (!this.state.task || !this.state.task.sparql_results) {
+			return;
+		}
+
+		const status = this.state.task.status;
+
+		if (status === TaskStatus.pending) {
 			return (
 				<Alert
 					title="Query is currently processed"
@@ -138,7 +160,7 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 				/>
 			);
 		}
-		if (this.state.sparql_results && this.state.status === "queue") {
+		if (status === TaskStatus.queue) {
 			return (
 				<Alert
 					title="Query is currently waiting in queue"
@@ -150,97 +172,58 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 		return null;
 	};
 
+	toggleCompareExecutions = () => {
+		this.setState({
+			isComparingExecutionPlans: !this.state.isComparingExecutionPlans,
+		});
+	};
+
 	render() {
 		return (
 			<>
-				{this.state.query ? (
+				{this.state.task ? (
 					<Stack>
-						<Flex wrap="wrap" mb="5" align="center" justifyContent="space-between">
-							<Heading as="h1" size="lg">
-								Task {this.state.taskId}
-							</Heading>
-
-							{this.state.query_name && (
-								<Heading mr="1" size="md">
-									Name: {this.state.query_name}
-								</Heading>
-							)}
-						</Flex>
 						{this.createAlertInfo()}
-						<Accordion defaultIndex={[0, 3]} allowMultiple>
-							<AccordionItem>
-								<AccordionButton>
-									<Box flex="1" textAlign="left">
-										Information
-									</Box>
-									<AccordionIcon />
-								</AccordionButton>
 
-								<AccordionPanel pb={4}>
-									<Stack shouldWrapChildren spacing="32px">
-										<MetaBadges
-											status={this.state.status}
-											resultCount={this.state.result_count}
-											requests={this.state.requests}
-											tDelta={this.state.t_delta}
-											showRequestHint={true}
-											tStart={timeConverter(this.state.t_start)}
-											tEnd={
-												this.state.t_end && timeConverter(this.state.t_end)
-											}
-										/>
-										<Flex wrap="wrap" mt="-5">
-											{this.state.sources &&
-												this.state.sources.map((el) => {
-													return <Badge key={el}>{el}</Badge>;
-												})}
-										</Flex>
-									</Stack>
-								</AccordionPanel>
-							</AccordionItem>
+						{this.state.isComparingExecutionPlans ? (
+							<TwoTasksComparison
+								first={this.state.task}
+								others={this.state.executionsForSameQuery}
+								leaveComparison={this.toggleCompareExecutions}
+							/>
+						) : (
+							<>
+								<Box pl="16px" mb="16px">
+									<Flex alignContent="center" mb="16px" justifyContent='space-between'>
+										<Heading as="h1" size="md" marginY="auto">
+											Task {this.state.task._id}
+										</Heading>
+										{this.state.executionsForSameQuery.length > 0 &&
+											!this.state.isComparingExecutionPlans &&
+											hasTaskFinished(this.state.task.status) && (
+												<Box>
+													<Flex>
+														<Button
+															display="inline"
+															colorScheme="gray"
+															onClick={this.toggleCompareExecutions}
+														>
+															Compare with other plans
+														</Button>
+													</Flex>
+												</Box>
+											)}
+									</Flex>
+									{this.state.task.query_name && (
+										<Heading mr="1" size="sm">
+											Name: {this.state.task.query_name}
+										</Heading>
+									)}
+								</Box>
 
-							<AccordionItem>
-								<AccordionButton>
-									<Box flex="1" textAlign="left">
-										Query
-									</Box>
-									<AccordionIcon />
-								</AccordionButton>
-								<AccordionPanel pb={4}>
-									<QueryEditor mode="view" query={this.state.query} />
-								</AccordionPanel>
-							</AccordionItem>
-
-							<AccordionItem>
-								<AccordionButton>
-									<Box flex="1" textAlign="left">
-										Execution Plan
-									</Box>
-									<AccordionIcon />
-								</AccordionButton>
-								<AccordionPanel pb={4}>
-									<ColoredExecutionPlanner
-										mode="view"
-										suggestedExecutionPlan={this.state.planCy}
-									/>
-								</AccordionPanel>
-							</AccordionItem>
-
-							<AccordionItem>
-								<AccordionButton>
-									<Box flex="1" textAlign="left">
-										Results
-									</Box>
-									<AccordionIcon />
-								</AccordionButton>
-								<AccordionPanel pb={4}>
-									<ResultTable
-										results={this.state.sparql_results}
-										status={this.state.status}
-									/>
-								</AccordionPanel>
-							</AccordionItem>
-						</Accordion>
+								<TaskOverview {...this.state.task} splitView={false} />
+							</>
+						)}
 					</Stack>
 				) : (
 					<Center>

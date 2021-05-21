@@ -1,12 +1,16 @@
 import axios from "axios";
 import { IQueryOverviewElement } from "interface/IQueryOverviewElement";
 import { ITaskPageDataResponse } from "interface/ITaskPageDataResponse";
-import { logger } from "utils/logger";
 
 interface IGetExecutionPlan {
 	query: string;
 	sources: string;
 	optimizer: string;
+}
+
+interface IGetExecutionsForIdenticalQuery {
+	query_hash: string;
+	plan_hash: string;
 }
 
 interface IExecuteQueryAsync {
@@ -19,11 +23,11 @@ interface IExecuteQueryAsync {
 
 const buildBaseURL = () => {
 	if (process.env.NODE_ENV === "production") {
-		logger("PRODUCTION");
+		console.log("PRODUCTION");
 		if (process.env.REACT_APP_BASE_URL && process.env.REACT_APP_API_PROXY) {
 			return process.env.REACT_APP_BASE_URL.concat(process.env.REACT_APP_API_PROXY);
 		} else {
-			logger("ERROR");
+			console.log("ERROR");
 			return "http://localhost:5000/";
 		}
 	} else {
@@ -45,4 +49,6 @@ export default {
 	getResult: (resultId: string) => API.get<ITaskPageDataResponse>(`result/${resultId}`),
 	getRequestList: () => API.get<IQueryOverviewElement[]>("/result"),
 	getFilteredList: (name: string) => API.get(`result/filter/${name}`),
+	getExecutionsForIdenticalQuery: (data: IGetExecutionsForIdenticalQuery) =>
+		API.get("/executions/hash", { params: data }),
 };

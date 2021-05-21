@@ -7,6 +7,8 @@ import signal
 import json
 from nlde.query.sparql_parser import parse
 import json
+import hashlib
+from collections import MutableMapping
 
 # logger = get_task_logger(__name__)
 logger = logging.getLogger("nlde_logger")
@@ -14,6 +16,35 @@ logger.setLevel(logging.INFO)
 
 app = Celery('tasks', broker='redis://redis:6379/0',
              backend='redis://redis:6379/0')
+
+
+def get_query_hash(query):
+    # TODO: Calculate isomorph queries
+    query_hash = hashlib.sha256(str(query).encode('utf-8')).hexdigest()
+    return query_hash
+
+
+def calc_query_plan_hash(plan):
+    relevant_keys = ["type", "left", "right", "cardinality", "tpf"]
+    filtered_plan = filter_dict_keys(plan, relevant_keys)
+    plan_hash = hashlib.sha256(json.dumps(
+        filtered_plan).encode('utf-8')).hexdigest()
+    return plan_hash
+
+
+# keys: Remove all keys in the dictionary except the ones contained in keys
+# Removes a new dict (is not in place)
+def filter_dict_keys(dictionary, keys):
+    keys_set = set(keys)
+
+    modified_dict = {}
+    for key, value in dictionary.items():
+        if key in keys_set:
+            if isinstance(value, MutableMapping):
+                modified_dict[key] = filter_dict_keys(value, keys_set)
+            else:
+                modified_dict[key] = value
+    return modified_dict
 
 
 @app.task()
@@ -119,9 +150,9 @@ def execute_plan(query_id, sources_json, plan_json, query_json, mongodb_url):
         print(e)
         raise e
 
-
     updated_plan_dict = plan.json_dict
-    query_hash = hash(parsedQuery)
+    query_hash = get_query_hash(parsedQuery)
+    plan_hash = calc_query_plan_hash(updated_plan_dict)
     tend = time()
 
     if tend - t0 > maximum_time_per_query:
@@ -133,9 +164,10 @@ def execute_plan(query_id, sources_json, plan_json, query_json, mongodb_url):
         {'$push': {
             'sparql_results.results.bindings': {'$each': aggregated_solutions}},
          '$set': {
-            'plan' : updated_plan_dict,
-             'query_hash' : query_hash,
-             'requests': plan.total_requests,
+            'plan': updated_plan_dict,
+            'query_hash': query_hash,
+            'plan_hash': plan_hash,
+            'requests': plan.total_requests,
             'status': status,
             't_end': tend,
             't_delta': (tend-t0),
@@ -144,5 +176,3 @@ def execute_plan(query_id, sources_json, plan_json, query_json, mongodb_url):
     )
 
     return ' Count: ' + str(result_count)
-
-
