@@ -28,6 +28,14 @@ function ResultTable(props: IResultTableProps) {
 		}
 	};
 
+	const resizeTable = () => {
+		// Workaround: rerender the table to show the borders.
+		// Sessionstorage is cleared because it contains vertical border starting points.
+		// Some cells might yet still be hidden if resolution is too low.
+		sessionStorage.clear();
+		yasr && yasr.draw();
+	};
+
 	useEffect(() => {
 		localStorage.removeItem("yasr__response");
 
@@ -35,8 +43,11 @@ function ResultTable(props: IResultTableProps) {
 			const yasrInstance = new Yasr(document.getElementById(yasrId) as HTMLElement, {});
 			updateResults(yasrInstance);
 			setYasr(yasrInstance);
+			window.addEventListener("resize", resizeTable);
 		}
-		return () => {};
+		return () => {
+			window.removeEventListener("resize", resizeTable);
+		};
 	}, []);
 
 	// Call this method each time the provided results change
@@ -48,11 +59,7 @@ function ResultTable(props: IResultTableProps) {
 	}, [props.results]);
 
 	useEffect(() => {
-		// Workaround: rerender the table to show the borders.
-		// Sessionstorage is cleared because it contains vertical border starting points.
-		// Some cells might yet still be hidden if resolution is too low.
-		sessionStorage.clear();
-		props.opened && yasr && yasr.draw();
+		props.opened && resizeTable();
 	}, [props.opened]);
 
 	return (

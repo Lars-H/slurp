@@ -12,6 +12,7 @@ import {
 	Badge,
 	ExpandedIndex,
 	Heading,
+	AccordionProps,
 } from "@chakra-ui/react";
 import ColoredExecutionPlanner from "components/ExecutionPlanner/ColoredExecutionPlanner";
 import MetaBadges from "components/MetaBadges/MetaBadges";
@@ -33,8 +34,8 @@ export type OverviewElements = "heading" | "info" | "query" | "plan" | "results"
 // }
 interface ITaskOverviewProps extends ITaskPageDataResponse {
 	splitView: boolean;
-	extendedItems: ExpandedIndex;
-	updateExtendedItems: (extendedItems: ExpandedIndex) => void;
+	extendedItems?: ExpandedIndex;
+	updateExtendedItems?: (extendedItems: ExpandedIndex) => void;
 	heights?: Record<OverviewElements, number>;
 	updateHeights?: any;
 }
@@ -94,27 +95,57 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 		}
 	};
 
+	const getAccordionProps = () => {
+		const accordionProps: AccordionProps = {
+			allowToggle: true,
+			allowMultiple: true,
+		};
+
+		if ("extendedItems" in props && "updateExtendedItems" in props) {
+			Object.assign(accordionProps, {
+				width: "50%",
+				onChange: (extendedItems) => {
+					props.updateExtendedItems && props.updateExtendedItems(extendedItems);
+
+					const currentHeights = {};
+					Object.keys(references).forEach((key) => {
+						if (references[key as OverviewElements].current) {
+							currentHeights[key] =
+								references[key as OverviewElements].current?.offsetHeight;
+						}
+					});
+
+					console.log("update");
+					props.updateHeights && props.updateHeights(currentHeights);
+				},
+				index: props.extendedItems,
+			});
+		} else {
+			Object.assign(accordionProps, {
+				width: "100%",
+				defaultIndex: [0, 3],
+			});
+		}
+		return accordionProps;
+	};
+
 	const noResultsAfterQueryFinished =
 		[TaskStatus.done, TaskStatus.timeout, TaskStatus.failed].includes(props.status) &&
 		props.sparql_results.results.bindings.length === 0;
 
 	return (
-		<Accordion
-			allowToggle
-			index={props.extendedItems}
-			allowMultiple
-			width={props.splitView ? "50%" : "100%"}
-			onChange={(extendedItems) => props.updateExtendedItems(extendedItems)}
-		>
-			<Box pl="16px" mb="8px" ref={references.heading} minHeight={heights.heading}>
-				<Heading as="h1" size="md" mb="16px">
-					Task {props._id}
-				</Heading>
-				{props.query_name && (
-					<Heading mr="1" size="sm">
-						Name: {props.query_name}
+		<Accordion {...getAccordionProps()}>
+			<Box pl="16px" mb="8px">
+				<Box ref={references.heading} minHeight={heights.heading} key={props._id}>
+					<Heading as="h1" size="md" mb="16px">
+						Task {props._id}
 					</Heading>
-				)}
+					{props.query_name && (
+						<Heading mr="1" size="sm">
+							Name: {props.query_name}
+						</Heading>
+					)}
+				</Box>
 			</Box>
 
 			<AccordionItem>
