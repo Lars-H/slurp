@@ -1,11 +1,11 @@
 import cloneDeep from "lodash/cloneDeep";
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
-import {nodeMenu, coreMenu} from "./cy-cxtmenu";
-import {convertSpecialCharsToHTML} from "../../utils/utils";
+import { nodeMenu, coreMenu } from "./cy-cxtmenu";
+import { convertSpecialCharsToHTML } from "../../utils/utils";
 import BinaryTree from "utils/DataStructures/binaryTree";
-import {InvalidExecutionPlanError} from "./InvalidExecutionPlanError";
+import { InvalidExecutionPlanError } from "./InvalidExecutionPlanError";
 import {
 	CollectionReturnValue,
 	EventObject,
@@ -289,17 +289,13 @@ export class CytoscapeService {
 		Create HTML Content for the generated Tippy on hover of a node.
 		Content is generic since it renders all key, value pairs which it receives from the backend (except default keys like id etc.)
 	*/
-	createTippyContent = (node: NodeSingular): HTMLDivElement | undefined => {
+	createTippyContent = (node: NodeSingular): HTMLDivElement | null => {
 		const ignoreKeys = ["id", "label", "type", "NLJdisabled", "joinOperator"];
-		let content: HTMLDivElement | undefined;
+		const content: HTMLDivElement = document.createElement("div");
 		for (const [key, value] of Object.entries(node.data())) {
 			// Do not show values of those keys.
 			if (ignoreKeys.includes(key)) {
 				continue;
-			}
-
-			if (!content) {
-				content = document.createElement("div");
 			}
 
 			const child = document.createElement("div");
@@ -315,7 +311,7 @@ export class CytoscapeService {
 					}
 					break;
 				case "estimated_tuples":
-					if (this.mode === 'edit') {
+					if (this.mode === "edit") {
 						child.innerHTML = `<b>Estimated Join Cardinality</b>: ${value}<br/>`;
 					}
 					break;
@@ -335,6 +331,11 @@ export class CytoscapeService {
 			}
 			content.appendChild(child);
 		}
+
+		if(content.children.length === 1) { // exclude default text node
+			return null;
+		}
+
 		return content;
 	};
 
@@ -618,11 +619,11 @@ export class CytoscapeService {
 		this.cy.add([
 			{
 				group: "edges",
-				data: {source: joinID, target: root1.data("id")},
+				data: { source: joinID, target: root1.data("id") },
 			},
 			{
 				group: "edges",
-				data: {source: joinID, target: root2.data("id")},
+				data: { source: joinID, target: root2.data("id") },
 			},
 		]);
 
