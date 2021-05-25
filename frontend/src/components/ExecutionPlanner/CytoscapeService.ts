@@ -604,8 +604,9 @@ export class CytoscapeService {
 		const joinID = uuidv4();
 		const joinOperator = {
 			id: joinID,
-			type: tree1.length > 1 && tree2.length > 1 ? "SHJ" : "NLJ",
+			joinOperator: tree1.length > 1 && tree2.length > 1 ? "SHJ" : "NLJ",
 			label: tree1.length > 1 && tree2.length > 1 ? "SHJ" : "NLJ",
+			type: "InnerNode",
 		};
 		this.cy.add({
 			data: joinOperator,
