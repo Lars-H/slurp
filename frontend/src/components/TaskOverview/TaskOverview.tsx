@@ -116,10 +116,6 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 		return accordionProps;
 	};
 
-	const noResultsAfterQueryFinished =
-		[TaskStatus.done, TaskStatus.timeout, TaskStatus.failed].includes(props.status) &&
-		props.sparql_results.results.bindings.length === 0;
-
 	return (
 		<Accordion {...getAccordionProps()}>
 			<AccordionItem>
@@ -174,26 +170,22 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 				</AccordionPanel>
 			</AccordionItem>
 
-			{noResultsAfterQueryFinished ? (
-				<NoResultsAccordionItem />
-			) : (
-				<AccordionItem>
-					<AccordionButton>
-						<Box flex="1" textAlign="left">
-							Results
-						</Box>
-						<AccordionIcon />
-					</AccordionButton>
-					<AccordionPanel pb={4} ref={references.results} minHeight={heights.results}>
-						<ResultTable
-							results={props.sparql_results}
-							status={props.status}
-							taskId={props._id}
-							opened={isResultTableOpened()}
-						/>
-					</AccordionPanel>
-				</AccordionItem>
-			)}
+			<AccordionItem>
+				<AccordionButton>
+					<Box flex="1" textAlign="left">
+						Results
+					</Box>
+					<AccordionIcon />
+				</AccordionButton>
+				<AccordionPanel pb={4} ref={references.results} minHeight={heights.results}>
+					<ResultTable
+						results={props.sparql_results}
+						status={props.status}
+						taskId={props._id}
+						opened={isResultTableOpened()}
+					/>
+				</AccordionPanel>
+			</AccordionItem>
 		</Accordion>
 	);
 };
