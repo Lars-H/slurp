@@ -9,6 +9,7 @@ from nlde.query.sparql_parser import parse
 import json
 import hashlib
 from collections import MutableMapping
+from time import time
 
 # logger = get_task_logger(__name__)
 logger = logging.getLogger("nlde_logger")
@@ -83,6 +84,13 @@ def execute_plan(query_id, sources_json, plan_json, query_json, mongodb_url):
         parsedQuery = parse(query_json)
         plan = PhysicalPlan(sources, 2, lplan,
                             poly_operator=False, query=parsedQuery)
+        variables = plan.tree.vars
+        queries.update_one(
+            {'_id': task_id},
+            {'$set': {
+                    'sparql_results.head.vars': list(variables) }}
+        )
+
     except Exception:
         queries.update_one(
             {'_id': task_id},
@@ -100,22 +108,23 @@ def execute_plan(query_id, sources_json, plan_json, query_json, mongodb_url):
     aggregated_solutions = []
     status = 'done'
     print("Vor der Eddie Schleife")
-    variables = set()
 
     # Set Timout for query execution
     signal.signal(signal.SIGALRM, En.stop_execution)
     signal.alarm(maximum_time_per_query)
 
     try:
+        t0 = time()
         for result in En.execute_standalone(plan):
-            print("In der Eddie Schleife")
+            t_elasped = time() - t0
             logger.info(result)
 
             # Add variables to variable set (for "head" of sparql result)
-            variables.update(result.data.keys())
+            #variables.update(result.data.keys())
 
             solution_dict = {}
-
+            counter += 1
+            result_count += 1
             # Check if URI or Literal
 
             for key, value in result.data.items():
@@ -124,11 +133,10 @@ def execute_plan(query_id, sources_json, plan_json, query_json, mongodb_url):
                 else:
                     val_type = 'Literal'
                 solution_dict[key] = {'value': value, 'type': val_type}
-
+            solution_dict['_trace_'] = {'value': str(t_elasped), 'type': 'Literal', 'count': str(result_count) }
             aggregated_solutions.append(solution_dict)
 
-            counter += 1
-            result_count += 1
+
 
             # Write aggregated results to MongoDB every X results
             if (counter % write_to_db_every == 0):
