@@ -21,17 +21,10 @@ import ResultTable from "components/ResultTable/ResultTable";
 import { timeConverter } from "utils/utils";
 import BinaryTree from "utils/DataStructures/binaryTree";
 import { ITaskPageDataResponse, TaskStatus } from "interface/ITaskPageDataResponse";
-import { NoResultsAccordionItem } from "./NoResultsAccordionItem";
+import PerformancePlot from "./PerformancePlot";
 
 export type OverviewElements = "heading" | "info" | "query" | "plan" | "results";
 
-// enum OverviewElements {
-// 	heading = 'heading',
-// 	info = 'info',
-// 	query = 'query',
-// 	plan = 'plan',
-// 	results = 'results',
-// }
 interface ITaskOverviewProps extends ITaskPageDataResponse {
 	splitView: boolean;
 	extendedItems?: ExpandedIndex;
@@ -89,9 +82,9 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 
 	const isResultTableOpened = () => {
 		if (Array.isArray(props.extendedItems)) {
-			return props.extendedItems.includes(3);
+			return props.extendedItems.includes(4);
 		} else {
-			return props.extendedItems === 3;
+			return props.extendedItems === 4;
 		}
 	};
 
@@ -110,11 +103,30 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 			});
 		} else {
 			Object.assign(accordionProps, {
-				defaultIndex: [0, 3],
+				defaultIndex: [0, 4],
 			});
 		}
 		return accordionProps;
 	};
+
+	const getQueryPerformanceData = () => {
+		const data: [number, number][] = [];
+
+		const bindings = props.sparql_results.results.bindings;
+
+		for(let i = 0; i < bindings.length; i++) {
+			const trace = bindings[i]["_trace_"];
+			if(!trace) {
+				continue;
+			}
+			data.push([parseFloat(trace.value), parseFloat(trace.count)]);
+		}
+		return data;
+	};
+
+	const test = props.sparql_results.results.bindings.map(binding=> {
+		delete binding['trace'];
+	})
 
 	return (
 		<Accordion {...getAccordionProps()}>
@@ -167,6 +179,18 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 				</AccordionButton>
 				<AccordionPanel pb={4} ref={references.plan} minHeight={heights.plan}>
 					<ColoredExecutionPlanner mode="view" suggestedExecutionPlan={cyPlan} />
+				</AccordionPanel>
+			</AccordionItem>
+
+			<AccordionItem>
+				<AccordionButton>
+					<Box flex="1" textAlign="left">
+						Processing Performance
+					</Box>
+					<AccordionIcon />
+				</AccordionButton>
+				<AccordionPanel pb={4}>
+					<PerformancePlot data={getQueryPerformanceData()} />
 				</AccordionPanel>
 			</AccordionItem>
 

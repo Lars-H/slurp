@@ -22,3 +22,26 @@ export interface ITaskPageDataResponse {
 	t_end?: number;
 	t_delta: number;
 }
+
+// type SparqlResults = {
+// 	head: {
+// 		vars: string[];
+// 	},
+// 	results: {
+// 		bindings: 
+// 	}
+// }
+
+// type BindingType = 'uri' | 'Literal';
+
+// type Binding = {
+// 	[key: string]: {
+// 		type: BindingType;
+// 		value: 'string';
+// 	};
+// 	_trace_: {
+// 		count: string;
+// 		type: BindingType;
+// 		value: CountQueuingStrategy;
+// 	}
+// }

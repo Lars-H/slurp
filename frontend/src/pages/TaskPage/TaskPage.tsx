@@ -21,7 +21,6 @@ import { RouteComponentProps } from "react-router-dom";
 import { ITaskPageDataResponse, TaskStatus } from "interface/ITaskPageDataResponse";
 import TaskOverview, { OverviewElements } from "components/TaskOverview/TaskOverview";
 import TwoTasksComparison from "components/TaskOverview/TwoTasksComparison";
-import { throws } from "node:assert";
 
 interface IMatchParams {
 	taskId: string;
@@ -71,6 +70,8 @@ class TaskPage extends Component<IAlertProps & IMatchProps, ITaskPageState> {
 			api.getResult(this.state.taskId)
 				.then((response) => {
 					this.setState({ task: response.data });
+
+					console.log(response.data.sparql_results)
 
 					setTimeout(() => {
 						this.getTaskInfo();
