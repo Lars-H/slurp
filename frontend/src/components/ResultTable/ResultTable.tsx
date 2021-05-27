@@ -53,7 +53,6 @@ function ResultTable(props: IResultTableProps) {
 	// Call this method each time the provided results change
 	useEffect(() => {
 		if (yasr && props.results) {
-			console.log(props.results);
 			updateResults(yasr);
 		}
 	}, [props.results]);
