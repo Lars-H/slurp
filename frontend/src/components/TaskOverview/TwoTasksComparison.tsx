@@ -49,6 +49,18 @@ const TwoTasksComparison = (props: TwoTasksComparisonProps) => {
 		}
 	};
 
+	const getExecutionTime = (task: ITaskPageDataResponse) => {
+		const bindings = task.sparql_results.results.bindings;
+		if(bindings.length === 0) {
+			throw new Error('No bindings');
+		}
+		return bindings[bindings.length - 1]['_trace_'].value;
+	}
+
+	const getLongestExecutionTimeOfBothTasks = (first: ITaskPageDataResponse, second: ITaskPageDataResponse): number => {
+		return Math.max(getExecutionTime(first), getExecutionTime(second));
+	}
+
 	return (
 		<>
 			<Flex justifyContent="center" mb="16px">
@@ -96,6 +108,7 @@ const TwoTasksComparison = (props: TwoTasksComparisonProps) => {
 						extendedItems={extendedItems}
 						updateExtendedItems={setExtendedItems}
 						updateHeights={updateSplitViewHeights}
+						longestExecution={getLongestExecutionTimeOfBothTasks(props.first, comparand)}
 						heights={heights}
 					/>
 				</Box>
@@ -108,6 +121,7 @@ const TwoTasksComparison = (props: TwoTasksComparisonProps) => {
 								extendedItems={extendedItems}
 								updateExtendedItems={setExtendedItems}
 								updateHeights={updateSplitViewHeights}
+								longestExecution={getLongestExecutionTimeOfBothTasks(props.first, comparand)}
 								heights={heights}
 							/>
 						</>

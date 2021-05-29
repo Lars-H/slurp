@@ -11,6 +11,7 @@ export type OverviewElements = "heading" | "info" | "query" | "plan" | "results"
 
 interface PerformancePlotProps {
 	data: [number, number][];
+	xMax?: number;
 }
 
 const PerformancePlot = (props: PerformancePlotProps) => {
@@ -41,6 +42,8 @@ const PerformancePlot = (props: PerformancePlotProps) => {
 				},
 				margin: 12,
 			},
+			min: 0,
+			max: props.xMax ?? null,
 		},
 		legend: {
 			enabled: false,
@@ -64,7 +67,7 @@ const PerformancePlot = (props: PerformancePlotProps) => {
                     </tr>
                     <tr>
                         <td><b>time:</b></td>
-                        <td style="padding-left: 5px">${(Math.round(this.point.x) / 10).toFixed(1)} sec</td>
+                        <td style="padding-left: 5px">${(Math.round(this.point.x * 10) / 10).toFixed(1)} sec</td>
                     </tr>
                 </table>`;
 			},

@@ -30,6 +30,7 @@ interface ITaskOverviewProps extends ITaskPageDataResponse {
 	extendedItems?: ExpandedIndex;
 	updateExtendedItems?: (extendedItems: ExpandedIndex) => void;
 	heights?: Record<OverviewElements, number>;
+	longestExecution?: number;
 	updateHeights?: any;
 }
 
@@ -114,9 +115,9 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 
 		const bindings = props.sparql_results.results.bindings;
 
-		for(let i = 0; i < bindings.length; i++) {
+		for (let i = 0; i < bindings.length; i++) {
 			const trace = bindings[i]["_trace_"];
-			if(!trace) {
+			if (!trace) {
 				continue;
 			}
 			data.push([parseFloat(trace.value), parseFloat(trace.count)]);
@@ -124,9 +125,9 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 		return data;
 	};
 
-	const test = props.sparql_results.results.bindings.map(binding=> {
-		delete binding['trace'];
-	})
+	const test = props.sparql_results.results.bindings.map((binding) => {
+		delete binding["trace"];
+	});
 
 	return (
 		<Accordion {...getAccordionProps()}>
@@ -185,12 +186,12 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 			<AccordionItem>
 				<AccordionButton>
 					<Box flex="1" textAlign="left">
-						Processing Performance
+						Diefficiency
 					</Box>
 					<AccordionIcon />
 				</AccordionButton>
 				<AccordionPanel pb={4}>
-					<PerformancePlot data={getQueryPerformanceData()} />
+					<PerformancePlot data={getQueryPerformanceData()} xMax={props.longestExecution} />
 				</AccordionPanel>
 			</AccordionItem>
 
