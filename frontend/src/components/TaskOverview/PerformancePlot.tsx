@@ -11,7 +11,7 @@ export type OverviewElements = "heading" | "info" | "query" | "plan" | "results"
 
 interface PerformancePlotProps {
 	data: [number, number][];
-	xMax?: number;
+	plotLimits?: {x: number, y: number};
 }
 
 const PerformancePlot = (props: PerformancePlotProps) => {
@@ -33,6 +33,7 @@ const PerformancePlot = (props: PerformancePlotProps) => {
 				},
 				margin: 16,
 			},
+			max: props.plotLimits ? props.plotLimits.y : null
 		},
 		xAxis: {
 			title: {
@@ -43,7 +44,7 @@ const PerformancePlot = (props: PerformancePlotProps) => {
 				margin: 12,
 			},
 			min: 0,
-			max: props.xMax ?? null,
+			max: props.plotLimits ? props.plotLimits.x : null,
 		},
 		legend: {
 			enabled: false,

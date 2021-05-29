@@ -30,7 +30,7 @@ interface ITaskOverviewProps extends ITaskPageDataResponse {
 	extendedItems?: ExpandedIndex;
 	updateExtendedItems?: (extendedItems: ExpandedIndex) => void;
 	heights?: Record<OverviewElements, number>;
-	longestExecution?: number;
+	plotLimits?: {x: number, y: number};
 	updateHeights?: any;
 }
 
@@ -191,7 +191,7 @@ const TaskOverview = (props: ITaskOverviewProps) => {
 					<AccordionIcon />
 				</AccordionButton>
 				<AccordionPanel pb={4}>
-					<PerformancePlot data={getQueryPerformanceData()} xMax={props.longestExecution} />
+					<PerformancePlot data={getQueryPerformanceData()} plotLimits={props.plotLimits} />
 				</AccordionPanel>
 			</AccordionItem>
 

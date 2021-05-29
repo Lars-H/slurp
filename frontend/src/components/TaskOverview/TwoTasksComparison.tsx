@@ -57,8 +57,15 @@ const TwoTasksComparison = (props: TwoTasksComparisonProps) => {
 		return bindings[bindings.length - 1]['_trace_'].value;
 	}
 
-	const getLongestExecutionTimeOfBothTasks = (first: ITaskPageDataResponse, second: ITaskPageDataResponse): number => {
-		return Math.max(getExecutionTime(first), getExecutionTime(second));
+	const getResultCount = (task: ITaskPageDataResponse): number => {
+		return task.sparql_results.results.bindings.length;
+	}
+
+	const getPlotXandYLimits = (first: ITaskPageDataResponse, second: ITaskPageDataResponse): {x: number, y: number} => {
+		return {
+			x: Math.max(getExecutionTime(first), getExecutionTime(second)),
+			y: Math.max(getResultCount(first), getResultCount(comparand)),
+		}
 	}
 
 	return (
@@ -108,7 +115,7 @@ const TwoTasksComparison = (props: TwoTasksComparisonProps) => {
 						extendedItems={extendedItems}
 						updateExtendedItems={setExtendedItems}
 						updateHeights={updateSplitViewHeights}
-						longestExecution={getLongestExecutionTimeOfBothTasks(props.first, comparand)}
+						plotLimits={getPlotXandYLimits(props.first, comparand)}
 						heights={heights}
 					/>
 				</Box>
@@ -121,7 +128,7 @@ const TwoTasksComparison = (props: TwoTasksComparisonProps) => {
 								extendedItems={extendedItems}
 								updateExtendedItems={setExtendedItems}
 								updateHeights={updateSplitViewHeights}
-								longestExecution={getLongestExecutionTimeOfBothTasks(props.first, comparand)}
+								plotLimits={getPlotXandYLimits(props.first, comparand)}
 								heights={heights}
 							/>
 						</>
