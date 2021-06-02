@@ -55,8 +55,6 @@ services:
   redis:
     restart: always
     image: "redis:4-alpine"
-    ports:
-      - "6379:6379"
 
   flower:
     restart: always
