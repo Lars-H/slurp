@@ -128,7 +128,7 @@ def execute_plan(query_id, sources_json, plan_json, query_json, mongodb_url):
             # Check if URI or Literal
 
             for key, value in result.data.items():
-                if 'http://' in value:
+                if str(value).startswith('http://') or str(value).startswith('https://'):
                     val_type = 'uri'
                 else:
                     val_type = 'Literal'
