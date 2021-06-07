@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { Route, BrowserRouter, Switch } from "react-router-dom";
+import { Route, BrowserRouter, Switch, BrowserRouterProps } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
 import PageNotFound from "./pages/PageNotFound/PageNotFound";
 import { Spinner } from "@chakra-ui/react";
@@ -11,13 +11,15 @@ const TaskPage = lazy(() => import("./pages/TaskPage/TaskPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage/AboutPage"));
 const VisualizerPage = lazy(() => import("./pages/VisualizerPage/VisualizerPage"));
 
+const routerProps = (): BrowserRouterProps  => process.env.NODE_ENV === "production" ? {basename: '/sites/slurp'} : {};
+
 export const createRoutes = () => {
 	return (
 		// <React.StrictMode>
 		// TODO: ChakraProvider colorMode=light
 		<ChakraProvider resetCSS={true}>
 			{/* TODO: basename Klären */}
-			<BrowserRouter>
+			<BrowserRouter {...routerProps()}>
 				<Navbar />
 				<Center>
 					<Box mb={4} w="80%" mx={5} mt={4}>
