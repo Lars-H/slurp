@@ -51,22 +51,25 @@ const TwoTasksComparison = (props: TwoTasksComparisonProps) => {
 
 	const getExecutionTime = (task: ITaskPageDataResponse) => {
 		const bindings = task.sparql_results.results.bindings;
-		if(bindings.length === 0) {
-			throw new Error('No bindings');
+		if (bindings.length === 0) {
+			throw new Error("No bindings");
 		}
-		return bindings[bindings.length - 1]['_trace_'].value;
-	}
+		return bindings[bindings.length - 1]["_trace_"].value;
+	};
 
 	const getResultCount = (task: ITaskPageDataResponse): number => {
 		return task.sparql_results.results.bindings.length;
-	}
+	};
 
-	const getPlotXandYLimits = (first: ITaskPageDataResponse, second: ITaskPageDataResponse): {x: number, y: number} => {
+	const getPlotXandYLimits = (
+		first: ITaskPageDataResponse,
+		second: ITaskPageDataResponse
+	): { x: number; y: number } => {
 		return {
 			x: Math.max(getExecutionTime(first), getExecutionTime(second)),
 			y: Math.max(getResultCount(first), getResultCount(comparand)),
-		}
-	}
+		};
+	};
 
 	return (
 		<>
@@ -82,11 +85,19 @@ const TwoTasksComparison = (props: TwoTasksComparisonProps) => {
 							onChange={(evt) => compareWithExecutionPlan(evt.target.value)}
 						>
 							{props.others.map((el) => {
-								return (
-									<option value={el._id} key={el._id}>
-										Task {el._id}
-									</option>
-								);
+								if (el.query_name) {
+									return (
+										<option value={el._id} key={el._id} title={"Task " + el._id}>
+											{el.query_name}
+										</option>
+									);
+								} else {
+									return (
+										<option value={el._id} key={el._id} title={el.query_name}>
+											Task {el._id}
+										</option>
+									);
+								}
 							})}
 						</Select>
 						<Button ml={2} onClick={props.leaveComparison}>
@@ -102,7 +113,7 @@ const TwoTasksComparison = (props: TwoTasksComparisonProps) => {
 						{props.first.query_name && `Name: ${props.first.query_name}`}
 					</Heading>
 					<Heading mr="1" size="sm" width="50%" marginLeft="16px" pl="24px">
-						{comparand.query_name && `Name: ${comparand.query_name}`}
+						{comparand.query_name && `Task: ${comparand._id}`}
 					</Heading>
 				</Flex>
 			)}
