@@ -336,7 +336,7 @@ export class CytoscapeService {
 			content.appendChild(child);
 		}
 
-		if(content.children.length === 1) { // exclude default text node
+		if(content.children.length <= 1) { // exclude default text node
 			return null;
 		}
 
