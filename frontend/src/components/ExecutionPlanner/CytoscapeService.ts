@@ -269,6 +269,10 @@ export class CytoscapeService {
 	 * A double click initiates the Leaf Swapping process.
 	 */
 	handleDoubleClick = (evt: EventObject) => {
+		if (this.nodeToSwap) {
+			this.resetSelectedNodeForSwap();
+		}
+
 		if (this.doubleClickTimeout) {
 			clearTimeout(this.doubleClickTimeout);
 		}
