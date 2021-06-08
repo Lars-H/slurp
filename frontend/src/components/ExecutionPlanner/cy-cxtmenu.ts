@@ -26,7 +26,7 @@ const getCommands = (updateEditHistory, mode) => {
 				content: "SHJ", // html/text content to be displayed in the menu
 				contentStyle: {}, // css key:value pairs to set the command's css in js if you want
 				select: async function (ele) {
-					await ele.data("type", "SHJ");
+					await ele.data("joinOperator", "SHJ");
 					await ele.data("label", "SHJ");
 					updateEditHistory("push");
 				},
@@ -37,7 +37,7 @@ const getCommands = (updateEditHistory, mode) => {
 				content: "NLJ",
 				contentStyle: {},
 				select: async function (ele) {
-					await ele.data("type", "NLJ");
+					await ele.data("joinOperator", "NLJ");
 					await ele.data("label", "NLJ");
 					updateEditHistory("push");
 				},
@@ -52,7 +52,7 @@ const getCommands = (updateEditHistory, mode) => {
 				content: "SHJ", // html/text content to be displayed in the menu
 				contentStyle: {}, // css key:value pairs to set the command's css in js if you want
 				select: async function (ele) {
-					await ele.data("type", "SHJ");
+					await ele.data("joinOperator", "SHJ");
 					await ele.data("label", "SHJ");
 					updateEditHistory("push");
 				},
@@ -63,7 +63,7 @@ const getCommands = (updateEditHistory, mode) => {
 				content: "NLJ",
 				contentStyle: {},
 				select: async function (ele) {
-					await ele.data("type", "NLJ");
+					await ele.data("joinOperator", "NLJ");
 					await ele.data("label", "NLJ");
 					updateEditHistory("push");
 				},
@@ -80,7 +80,7 @@ const getCommands = (updateEditHistory, mode) => {
 			content: "SHJ", // html/text content to be displayed in the menu
 			contentStyle: {}, // css key:value pairs to set the command's css in js if you want
 			select: async function (ele) {
-				await ele.data("type", "SHJ");
+				await ele.data("joinOperator", "SHJ");
 				await ele.data("label", "SHJ");
 				updateEditHistory("push");
 			},
@@ -91,7 +91,7 @@ const getCommands = (updateEditHistory, mode) => {
 			content: "NLJ",
 			contentStyle: {},
 			select: async function (ele) {
-				await ele.data("type", "NLJ");
+				await ele.data("joinOperator", "NLJ");
 				await ele.data("label", "NLJ");
 				updateEditHistory("push");
 			},
