@@ -85,6 +85,16 @@ def execute_plan(query_id, sources_json, plan_json, query_json, mongodb_url):
         plan = PhysicalPlan(sources, 2, lplan,
                             poly_operator=False, query=parsedQuery)
         variables = plan.tree.vars
+
+
+        if plan.query.projection:
+            try:
+                args = [str(arg.get_variable()) for arg in plan.query.projection]
+                variables = args
+            except Exception as e:
+                print(e)
+
+
         queries.update_one(
             {'_id': task_id},
             {'$set': {
