@@ -1,19 +1,18 @@
 import React from "react";
-import { Box, Badge, HStack, Tooltip, Flex, Grid, Wrap, WrapItem } from "@chakra-ui/react";
+import {Box, Badge, HStack, Tooltip, Flex, Grid, Wrap, WrapItem} from "@chakra-ui/react";
 import StatusBadge from "components/QueryBox/StatusBadge";
 
 const MetaBadges = (props) => {
+	console.log(props.resultCount)
 	return (
 		<Wrap wrap="wrap">
 			<WrapItem>
 				<StatusBadge status={props.status} />
 			</WrapItem>
 
-			{(props.resultCount !== null || props.resultCount !== undefined) && (
-				<WrapItem>
-					<Badge colorScheme="yellow">Results: {props.resultCount}</Badge>
-				</WrapItem>
-			)}
+			<WrapItem>
+				<Badge colorScheme="yellow">Results: {props.resultCount ?? '-'}</Badge>
+			</WrapItem>
 
 			<WrapItem>
 				<Badge colorScheme="purple">Runtime: {props.tDelta.toFixed(2)} Sec</Badge>
