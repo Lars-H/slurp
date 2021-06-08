@@ -65,11 +65,11 @@ const Navbar = () => {
 					</Link>
 				)}
 				<Link to="/about">
-					<Text color="white" mr="30">
+					<Text color="white">
 						About
 					</Text>
 				</Link>
-				<DarkModeToggle />
+				{/* <DarkModeToggle /> */}
 			</HStack>
 		</Flex>
 	);
