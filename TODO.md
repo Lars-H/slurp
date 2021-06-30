@@ -1,5 +1,3 @@
-HISTORY PUSH BEI QUERY BOX
-
 Bei Bestimmten Groessen: panning oder nicht entscheiden. Auch auf die Groesse achten
 
 Wenn ich auf Visualize Page einen neuen Plan eingebe, soll dieser wieder fokussiert werdenn!!!!
@@ -14,6 +12,9 @@ Task ID + Hovern. Anzeigen der Query.
 
 MongoDB logs entfenren
 
+
+
+30.06.2021
 
 Sampling - 1000 - 2000 Elemente damit Graph nicht zu langsam
 
