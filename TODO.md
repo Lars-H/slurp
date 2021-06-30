@@ -13,3 +13,9 @@ Button Sicht zentrieren
 Task ID + Hovern. Anzeigen der Query.
 
 MongoDB logs entfenren
+
+
+Sampling - 1000 - 2000 Elemente damit Graph nicht zu langsam
+
+Intermediate Results auf den Kanten schreiben. Wenn blatt, dann die Cardinality, Wenn knoten dann sie Produced tuples
+Togglebar: Man soll die Kantenbeschriftung an und aus machen können
